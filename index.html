@@ -1,0 +1,836 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krish Madhavan - Research Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            color: #1a1a1a;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 50%, #ffffff 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%238B7355' stroke-width='0.5' opacity='0.4'%3E%3Cpath d='M20,50 Q40,30 60,50 T100,50'/%3E%3Ccircle cx='150' cy='50' r='15'/%3E%3Cpath d='M30,100 L50,120 L70,100'/%3E%3Cpath d='M120,90 Q140,110 160,90'/%3E%3Cline x1='20' y1='150' x2='80' y2='150'/%3E%3Ccircle cx='50' cy='150' r='5'/%3E%3Cpath d='M100,140 L120,160 M120,140 L100,160'/%3E%3Cpath d='M140,150 Q160,140 180,150'/%3E%3C/g%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg width='250' height='250' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%238B7355' stroke-width='0.5' opacity='0.4'%3E%3Cpath d='M50,50 L70,30 L90,50 L70,70 Z'/%3E%3Ccircle cx='150' cy='80' r='20'/%3E%3Cpath d='M30,150 Q50,130 70,150 T110,150'/%3E%3Cline x1='140' y1='140' x2='180' y2='180'/%3E%3Cpath d='M200,50 C210,30 230,30 240,50'/%3E%3Cpath d='M180,150 L200,170 L220,150 L200,130 Z'/%3E%3C/g%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg width='180' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%238B7355' stroke-width='0.5' opacity='0.4'%3E%3Cpath d='M40,40 Q60,20 80,40'/%3E%3Ccircle cx='120' cy='40' r='12'/%3E%3Cpath d='M30,90 L50,110 M50,90 L30,110'/%3E%3Cpath d='M100,90 Q120,70 140,90'/%3E%3Cline x1='30' y1='140' x2='70' y2='140'/%3E%3Cpath d='M100,130 L120,150 L140,130'/%3E%3C/g%3E%3C/svg%3E");
+            background-position: 0 0, 100px 100px, 200px 50px;
+            background-size: 200px 200px, 250px 250px, 180px 180px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff6b35;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1a1a1a;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ff6b35;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: #ff6b35;
+        }
+
+        .hero {
+            margin-top: 80px;
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 5px;
+            background: #ff6b35;
+            animation: slideIn 0.8s ease 0.3s both;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #666;
+            margin-top: 2rem;
+            max-width: 600px;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: #ff6b35;
+        }
+
+        .editable {
+            min-height: 30px;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            cursor: text;
+        }
+
+        .editable:hover {
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .editable:focus {
+            outline: 2px solid #ff6b35;
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .research-grid, .hobby-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid #ff6b35;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .card .year {
+            color: #ff6b35;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .card .link-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #f0f0f0;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .card .link-input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .card .project-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .card .project-link:hover {
+            color: #ff5722;
+            transform: translateX(5px);
+        }
+
+        .card .project-link::after {
+            content: ' →';
+        }
+
+        .add-btn {
+            background: #ff6b35;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background: #ff5722;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b35;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            background: #ff6b35;
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #ff5722;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100px;
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pageTransition {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+
+        .edit-mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #ff6b35;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .edit-mode-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .profile-photo-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #ff6b35;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+            transition: all 0.3s ease;
+            animation: fadeInScale 0.8s ease;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
+        }
+
+        .upload-photo-btn {
+            background: #ff6b35;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-photo-btn:hover {
+            background: #ff5722;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .page-transition {
+            animation: pageTransition 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    <button class="edit-mode-toggle" onclick="toggleEditMode()">✏️ Edit Mode: OFF</button>
+
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="logo">KM</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#hobbies">Hobbies</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div style="display: flex; align-items: center; gap: 3rem; flex-wrap: wrap;">
+            <div class="profile-photo-container">
+                <img id="profilePhoto" src="https://via.placeholder.com/200" alt="Profile Photo" class="profile-photo">
+                <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                <button class="upload-photo-btn" onclick="document.getElementById('photoUpload').click()">
+                    📷 Upload Photo
+                </button>
+            </div>
+            <div>
+                <h1 class="editable" contenteditable="false" data-field="name">Krish Madhavan</h1>
+                <p class="editable" contenteditable="false" data-field="bio">Student and researcher at California Polytechnic State University, San Luis Obispo. Passionate about exploring innovative research methodologies and pushing the boundaries of knowledge through interdisciplinary collaboration and creative problem-solving.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="research" class="section">
+        <h2 class="section-title">Research Projects</h2>
+        <div class="research-grid" id="researchGrid">
+            <div class="card" data-url="">
+                <div class="year editable" contenteditable="false">2024</div>
+                <h3 class="editable" contenteditable="false">Research Project One</h3>
+                <p class="editable" contenteditable="false">Description of your first research project at Cal Poly SLO. Include methodology, findings, and impact of your work.</p>
+                <input type="text" class="link-input" placeholder="Enter project link (e.g., https://...)" style="display: none;" onchange="updateCardLink(this)">
+                <a href="#" class="project-link" style="display: none;" target="_blank">View Project</a>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+            <div class="card" data-url="">
+                <div class="year editable" contenteditable="false">2024</div>
+                <h3 class="editable" contenteditable="false">Research Project Two</h3>
+                <p class="editable" contenteditable="false">Description of your second research project. Detail the objectives, research methods, and key outcomes.</p>
+                <input type="text" class="link-input" placeholder="Enter project link (e.g., https://...)" style="display: none;" onchange="updateCardLink(this)">
+                <a href="#" class="project-link" style="display: none;" target="_blank">View Project</a>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+            <div class="card" data-url="">
+                <div class="year editable" contenteditable="false">2023</div>
+                <h3 class="editable" contenteditable="false">Research Project Three</h3>
+                <p class="editable" contenteditable="false">Description of your third research project. Include collaborations and significant contributions to the field.</p>
+                <input type="text" class="link-input" placeholder="Enter project link (e.g., https://...)" style="display: none;" onchange="updateCardLink(this)">
+                <a href="#" class="project-link" style="display: none;" target="_blank">View Project</a>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+            <div class="card" data-url="">
+                <div class="year editable" contenteditable="false">2023</div>
+                <h3 class="editable" contenteditable="false">Research Project Four</h3>
+                <p class="editable" contenteditable="false">Description of your fourth research project. Highlight innovative approaches and research impact.</p>
+                <input type="text" class="link-input" placeholder="Enter project link (e.g., https://...)" style="display: none;" onchange="updateCardLink(this)">
+                <a href="#" class="project-link" style="display: none;" target="_blank">View Project</a>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+        </div>
+        <button class="add-btn" onclick="addResearchCard()" style="display: none;">+ Add Research Project</button>
+    </section>
+
+    <section id="hobbies" class="section">
+        <h2 class="section-title">Hobbies & Creative Work</h2>
+        <div class="hobby-grid" id="hobbyGrid">
+            <div class="card">
+                <h3 class="editable" contenteditable="false">Videography & Filming</h3>
+                <p class="editable" contenteditable="false">Passionate about visual storytelling through videography and cinematography. Creating compelling narratives through the lens.</p>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+            <div class="card">
+                <h3 class="editable" contenteditable="false">Music Production</h3>
+                <p class="editable" contenteditable="false">Exploring sound design and music creation. Experimenting with various genres and production techniques to craft unique auditory experiences.</p>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+            <div class="card">
+                <h3 class="editable" contenteditable="false">Creative Arts</h3>
+                <p class="editable" contenteditable="false">Combining technical skills with artistic vision to create multimedia projects and explore the intersection of technology and creativity.</p>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: none;">Delete</button>
+            </div>
+        </div>
+        <button class="add-btn" onclick="addHobbyCard()" style="display: none;">+ Add Hobby</button>
+    </section>
+
+    <section id="contact" class="section">
+        <h2 class="section-title">Contact Me</h2>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2025 Krish Madhavan. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let editMode = false;
+        let portfolioData = {
+            name: 'Krish Madhavan',
+            bio: 'Student and researcher at California Polytechnic State University, San Luis Obispo. Passionate about exploring innovative research methodologies and pushing the boundaries of knowledge through interdisciplinary collaboration and creative problem-solving.',
+            photo: 'https://via.placeholder.com/200',
+            research: [],
+            hobbies: []
+        };
+
+        // Load saved data on page load
+        window.addEventListener('load', loadData);
+
+        function saveData() {
+            // Save all editable content
+            portfolioData.name = document.querySelector('[data-field="name"]').textContent;
+            portfolioData.bio = document.querySelector('[data-field="bio"]').textContent;
+            
+            // Save research projects
+            portfolioData.research = [];
+            document.querySelectorAll('#researchGrid .card').forEach(card => {
+                portfolioData.research.push({
+                    year: card.querySelector('.year').textContent,
+                    title: card.querySelector('h3').textContent,
+                    description: card.querySelector('p').textContent,
+                    url: card.dataset.url || ''
+                });
+            });
+
+            // Save hobbies
+            portfolioData.hobbies = [];
+            document.querySelectorAll('#hobbyGrid .card').forEach(card => {
+                portfolioData.hobbies.push({
+                    title: card.querySelector('h3').textContent,
+                    description: card.querySelector('p').textContent
+                });
+            });
+
+            console.log('Data saved:', portfolioData);
+        }
+
+        function loadData() {
+            // In a real app, you'd load from localStorage or a database
+            // For now, we'll just use the initial state
+            console.log('Data loaded:', portfolioData);
+        }
+
+        // Save data whenever content changes
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('editable')) {
+                saveData();
+            }
+        });
+
+        // Photo upload functionality
+        document.getElementById('photoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    portfolioData.photo = event.target.result;
+                    document.getElementById('profilePhoto').src = event.target.result;
+                    saveData();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function updateCardLink(input) {
+            const card = input.closest('.card');
+            const link = card.querySelector('.project-link');
+            const url = input.value.trim();
+            
+            card.dataset.url = url;
+            
+            if (url) {
+                link.href = url;
+                link.style.display = 'inline-block';
+            } else {
+                link.style.display = 'none';
+            }
+            
+            saveData();
+        }
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const target = document.querySelector(targetId);
+                
+                if (target) {
+                    // Add fade transition
+                    target.classList.add('page-transition');
+                    
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // Remove class after animation
+                    setTimeout(() => {
+                        target.classList.remove('page-transition');
+                    }, 600);
+                }
+            });
+        });
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const btn = document.querySelector('.edit-mode-toggle');
+            const editables = document.querySelectorAll('.editable');
+            const addBtns = document.querySelectorAll('.add-btn');
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            const linkInputs = document.querySelectorAll('.link-input');
+
+            editables.forEach(el => {
+                el.contentEditable = editMode;
+            });
+
+            addBtns.forEach(btn => {
+                btn.style.display = editMode ? 'block' : 'none';
+            });
+
+            deleteBtns.forEach(btn => {
+                btn.style.display = editMode ? 'inline-block' : 'none';
+            });
+
+            linkInputs.forEach(input => {
+                input.style.display = editMode ? 'block' : 'none';
+            });
+
+            btn.textContent = editMode ? '💾 Edit Mode: ON' : '✏️ Edit Mode: OFF';
+            btn.style.background = editMode ? '#28a745' : '#ff6b35';
+        }
+
+        function addResearchCard() {
+            const grid = document.getElementById('researchGrid');
+            const newCard = document.createElement('div');
+            newCard.className = 'card';
+            newCard.dataset.url = '';
+            newCard.innerHTML = `
+                <div class="year editable" contenteditable="true">2024</div>
+                <h3 class="editable" contenteditable="true">New Research Project</h3>
+                <p class="editable" contenteditable="true">Click to edit the description of your research project.</p>
+                <input type="text" class="link-input" placeholder="Enter project link (e.g., https://...)" style="display: inline-block;" onchange="updateCardLink(this)">
+                <a href="#" class="project-link" style="display: none;" target="_blank">View Project</a>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: inline-block;">Delete</button>
+            `;
+            grid.appendChild(newCard);
+            newCard.style.animation = 'fadeInUp 0.5s ease';
+            saveData();
+        }
+
+        function addHobbyCard() {
+            const grid = document.getElementById('hobbyGrid');
+            const newCard = document.createElement('div');
+            newCard.className = 'card';
+            newCard.innerHTML = `
+                <h3 class="editable" contenteditable="true">New Hobby</h3>
+                <p class="editable" contenteditable="true">Click to edit the description of your hobby.</p>
+                <button class="delete-btn" onclick="deleteCard(this)" style="display: inline-block;">Delete</button>
+            `;
+            grid.appendChild(newCard);
+            newCard.style.animation = 'fadeInUp 0.5s ease';
+            saveData();
+        }
+
+        function deleteCard(btn) {
+            const card = btn.parentElement;
+            card.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                card.remove();
+                saveData();
+            }, 300);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('.submit-btn');
+            btn.textContent = 'Sending...';
+            btn.style.background = '#28a745';
+            
+            setTimeout(() => {
+                alert('Thank you for your message! This is a demo form.');
+                e.target.reset();
+                btn.textContent = 'Send Message';
+                btn.style.background = '#ff6b35';
+            }, 1000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; transform: scale(1); }
+                to { opacity: 0; transform: scale(0.8); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
