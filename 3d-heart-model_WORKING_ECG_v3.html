@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Heart Model</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);
+            font-family: 'Arial', sans-serif;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #c62828;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 250px;
+        }
+        #rotation-toggle {
+            position: absolute;
+            top: 160px;
+            left: 20px;
+            color: white;
+            background: #c62828;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        #rotation-toggle:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        #rotation-toggle.active {
+            background: #2e7d32;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .label {
+            position: absolute;
+            color: #c62828;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: auto;
+            border: 2px solid #ef5350;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .label::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background: #ffd54f;
+            transform-origin: top left;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 8px rgba(255, 213, 79, 0.6);
+        }
+        .label.highlighted::before {
+            opacity: 1;
+        }
+        .label:hover {
+            background: #ffebee;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .label.highlighted {
+            background: #c62828;
+            color: white;
+            border-color: #c62828;
+            transform: scale(1.1);
+        }
+        #description {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            color: #c62828;
+            background: rgba(255, 255, 255, 0.97);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+            display: none;
+            z-index: 100;
+        }
+        #description h2 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            color: #c62828;
+        }
+        #description p {
+            margin: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        #heartbeat-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #c62828;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .heartbeat {
+            display: inline-block;
+            animation: beat 1s ease-in-out infinite;
+        }
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    
+        /* =============================
+           ECG + RHYTHM UI (added)
+           ============================= */
+        #top-right-stack {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: grid;
+            gap: 10px;
+            z-index: 250;
+        }
+        #rhythm-panel {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            color: #c62828;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 14px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 13px;
+            min-width: 240px;
+            z-index: 1000;
+        }
+        #rhythm-panel label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        #rhythmSelect {
+            width: 100%;
+            border: 2px solid #ef5350;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            outline: none;
+            background: white;
+            color: #b71c1c;
+            cursor: pointer;
+        }
+        #rhythm-meta {
+            margin-top: 8px;
+            color: #555;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        /* Bottom-right "tab" drawer */
+        #ecg-drawer {
+            position: absolute;
+            right: 18px;
+            bottom: 18px;
+            width: 380px;
+            max-width: calc(100vw - 36px);
+            background: rgba(255, 255, 255, 0.92);
+            border: 2px solid #ef5350;
+            border-radius: 14px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+            overflow: hidden;
+            z-index: 260;
+            transform: translateY(calc(100% - 48px));
+            transition: transform 260ms ease;
+            backdrop-filter: blur(8px);
+        }
+        #ecg-drawer.open { transform: translateY(0); }
+
+        #ecg-header {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px 0 14px;
+            background: linear-gradient(135deg, rgba(198, 40, 40, 0.10), rgba(255, 235, 238, 0.7));
+            user-select: none;
+            cursor: pointer;
+        }
+        #ecg-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #b71c1c;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        #ecg-toggle {
+            border: none;
+            background: #c62828;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #ecg-toggle:hover { background: #b71c1c; }
+
+        #ecg-body { padding: 10px 12px 12px 12px; }
+        #ecg-canvas {
+            width: 100%;
+            height: 150px;
+            display: block;
+            background: rgba(255, 235, 238, 0.65);
+            border-radius: 10px;
+            border: 1px solid rgba(239, 83, 80, 0.5);
+        }
+        #ecg-footer {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        #ecg-bpm { font-weight: bold; color: #b71c1c; }
+
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="info">
+        <h1>3D Heart Model</h1>
+        <p>🔍 Scroll to zoom</p>
+        <p>👆 Click parts to learn more</p>
+    </div>
+    <div id="rotation-toggle">🔒 Click to Enable Rotation</div>
+<div id="rhythm-panel">
+            <label for="rhythmSelect">Rhythm</label>
+            <select id="rhythmSelect">
+                <option value="normal" selected>Normal</option>
+                <option value="tachy">Tachycardia</option>
+                <option value="brady">Bradycardia</option>
+                <option value="attack">Heart attack (ST elevation demo)</option>
+            </select>
+            <div id="rhythm-meta"></div>
+        
+
+    <div id="top-right-stack">
+        <div id="heartbeat-indicator">
+            <span class="heartbeat">❤️</span> <span id="beatLabel">Beating</span> <span id="bpmLabel" style="margin-left:8px;color:#666;font-weight:600;">72 bpm</span>
+        </div>
+
+        </div>
+    </div>
+
+    <div id="ecg-drawer" class="open" aria-label="ECG Panel">
+        <div id="ecg-header" role="button" aria-controls="ecg-body" aria-expanded="true">
+            <div id="ecg-title">🫀 ECG (PQRST)</div>
+            <button id="ecg-toggle" type="button">Hide</button>
+        </div>
+        <div id="ecg-body">
+            <canvas id="ecg-canvas"></canvas>
+            <div id="ecg-footer">
+                <div id="ecg-bpm">72 bpm</div>
+                <div id="ecg-hint">Line scrolls left → right</div>
+            </div>
+        </div>
+    </div>
+
+<div id="description"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, heart, labels = [];
+        let isDragging = false;
+        let dragEnabled = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotation = { x: 0.2, y: 0 };
+        let heartParts = {};
+        let raycaster, mouse;
+        let hoveredPart = null;
+        let selectedPart = null;
+
+        const partDescriptions = {
+            leftAtrium: {
+                name: 'Left Atrium',
+                description: 'The left atrium receives oxygen-rich blood from the lungs via the pulmonary veins. During diastole (relaxation), it fills with blood and then contracts to push blood into the left ventricle through the mitral valve.'
+            },
+            rightAtrium: {
+                name: 'Right Atrium',
+                description: 'The right atrium receives oxygen-poor blood from the body through the superior and inferior vena cava. It contracts to push blood into the right ventricle through the tricuspid valve.'
+            },
+            leftVentricle: {
+                name: 'Left Ventricle',
+                description: 'The left ventricle is the heart\'s main pumping chamber. Its thick muscular walls contract powerfully to pump oxygen-rich blood through the aortic valve into the aorta, distributing it throughout the entire body.'
+            },
+            rightVentricle: {
+                name: 'Right Ventricle',
+                description: 'The right ventricle pumps oxygen-poor blood through the pulmonary valve into the pulmonary arteries, sending it to the lungs where it picks up oxygen and releases carbon dioxide.'
+            },
+            aorta: {
+                name: 'Aorta',
+                description: 'The aorta is the body\'s largest artery. It receives oxygen-rich blood from the left ventricle and branches to deliver blood to all parts of the body. It can withstand high pressure from the powerful left ventricular contractions.'
+            },
+            pulmonaryArtery: {
+                name: 'Pulmonary Artery',
+                description: 'The pulmonary artery carries oxygen-poor blood from the right ventricle to the lungs. It splits into left and right branches, each going to one lung for oxygenation.'
+            },
+            pulmonaryVeins: {
+                name: 'Pulmonary Veins',
+                description: 'The pulmonary veins carry oxygen-rich blood from the lungs back to the left atrium. Unlike most veins, these carry oxygenated rather than deoxygenated blood.'
+            },
+            venaCava: {
+                name: 'Vena Cava',
+                description: 'The superior and inferior vena cava are large veins that return oxygen-poor blood from the body to the right atrium. The superior vena cava drains the upper body, while the inferior vena cava drains the lower body.'
+            },
+            septum: {
+                name: 'Interventricular Septum',
+                description: 'The septum is the muscular wall that separates the left and right ventricles, preventing oxygen-rich and oxygen-poor blood from mixing. It\'s essential for maintaining efficient circulation.'
+            },
+            apex: {
+                name: 'Apex',
+                description: 'The apex is the pointed bottom tip of the heart, formed mainly by the left ventricle. It points downward, forward, and to the left. You can often feel your heartbeat here.'
+            }
+        };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffebee);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 6;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight1.position.set(5, 5, 5);
+            scene.add(directionalLight1);
+
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+            directionalLight2.position.set(-5, -5, -5);
+            scene.add(directionalLight2);
+
+            createHeart();
+            createLabels();
+
+            const toggleBtn = document.getElementById('rotation-toggle');
+            toggleBtn.addEventListener('click', toggleDragMode);
+
+            renderer.domElement.addEventListener('mousedown', onMouseDown);
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('mouseup', onMouseUp);
+            renderer.domElement.addEventListener('wheel', onWheel);
+            renderer.domElement.addEventListener('click', onCanvasClick);
+            document.addEventListener('click', onDocumentClick);
+            window.addEventListener('resize', onWindowResize);
+
+
+            // ===== ECG init (added) =====
+            ecg.canvas = document.getElementById("ecg-canvas");
+            ecg.ctx = ecg.canvas.getContext("2d");
+            resizeEcgCanvas();
+            window.addEventListener("resize", resizeEcgCanvas);
+
+            const sel = document.getElementById("rhythmSelect");
+            sel.addEventListener("change", (e) => applyRhythm(e.target.value));
+            applyRhythm("normal");
+
+            const drawer = document.getElementById("ecg-drawer");
+            const toggle = document.getElementById("ecg-toggle");
+            const header = document.getElementById("ecg-header");
+
+            function setDrawer(open) {
+                if (open) drawer.classList.add("open");
+                else drawer.classList.remove("open");
+                toggle.textContent = open ? "Hide" : "Show";
+                header.setAttribute("aria-expanded", open ? "true" : "false");
+            }
+
+            // header click toggles
+            header.addEventListener("click", (ev) => {
+                // prevent double toggle when clicking the button inside
+                if (ev.target === toggle) return;
+                setDrawer(!drawer.classList.contains("open"));
+            });
+            toggle.addEventListener("click", (ev) => {
+                ev.stopPropagation();
+                setDrawer(!drawer.classList.contains("open"));
+            });
+
+
+            animate();
+        }
+
+        function createHeart() {
+            heart = new THREE.Group();
+
+            // Left Ventricle (larger, more muscular) - increased detail
+            const leftVentricleGeometry = new THREE.SphereGeometry(0.9, 24, 24);
+            leftVentricleGeometry.scale(1.0, 1.3, 0.85);
+            const ventricleMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xd32f2f,
+                flatShading: true,
+                shininess: 40
+            });
+            const leftVentricle = new THREE.Mesh(leftVentricleGeometry, ventricleMaterial);
+            leftVentricle.position.set(-0.35, -0.3, 0);
+            leftVentricle.userData = { name: 'leftVentricle', clickable: true };
+            heartParts.leftVentricle = leftVentricle;
+            heart.add(leftVentricle);
+
+            // Right Ventricle - increased detail
+            const rightVentricleGeometry = new THREE.SphereGeometry(0.75, 24, 24);
+            rightVentricleGeometry.scale(0.9, 1.2, 0.8);
+            const rightVentricleMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xe53935,
+                flatShading: true,
+                shininess: 40
+            });
+            const rightVentricle = new THREE.Mesh(rightVentricleGeometry, rightVentricleMaterial);
+            rightVentricle.position.set(0.45, -0.25, 0.15);
+            rightVentricle.userData = { name: 'rightVentricle', clickable: true };
+            heartParts.rightVentricle = rightVentricle;
+            heart.add(rightVentricle);
+
+            // Septum (wall between ventricles) - thicker and more detailed
+            const septumGeometry = new THREE.BoxGeometry(0.2, 1.8, 0.9);
+            const septumMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xc62828,
+                flatShading: true,
+                shininess: 40
+            });
+            const septum = new THREE.Mesh(septumGeometry, septumMaterial);
+            septum.position.set(0, -0.15, 0.05);
+            septum.rotation.z = 0.1;
+            septum.userData = { name: 'septum', clickable: true };
+            heartParts.septum = septum;
+            heart.add(septum);
+
+            // Left Atrium - increased detail
+            const leftAtriumGeometry = new THREE.SphereGeometry(0.65, 20, 20);
+            const atriumMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xff6b6b,
+                flatShading: true,
+                shininess: 40
+            });
+            const leftAtrium = new THREE.Mesh(leftAtriumGeometry, atriumMaterial);
+            leftAtrium.position.set(-0.65, 0.95, 0.1);
+            leftAtrium.userData = { name: 'leftAtrium', clickable: true };
+            heartParts.leftAtrium = leftAtrium;
+            heart.add(leftAtrium);
+
+            // Right Atrium - increased detail
+            const rightAtrium = new THREE.Mesh(leftAtriumGeometry, atriumMaterial.clone());
+            rightAtrium.material.color.setHex(0xff8080);
+            rightAtrium.position.set(0.65, 0.95, 0.2);
+            rightAtrium.userData = { name: 'rightAtrium', clickable: true };
+            heartParts.rightAtrium = rightAtrium;
+            heart.add(rightAtrium);
+
+            // Aorta - increased detail
+            const aortaGeometry = new THREE.CylinderGeometry(0.28, 0.35, 1.8, 20);
+            const aortaMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xe57373,
+                flatShading: true,
+                shininess: 40
+            });
+            const aorta = new THREE.Mesh(aortaGeometry, aortaMaterial);
+            aorta.position.set(-0.4, 1.7, -0.05);
+            aorta.rotation.z = 0.35;
+            aorta.userData = { name: 'aorta', clickable: true };
+            heartParts.aorta = aorta;
+            heart.add(aorta);
+
+            // Pulmonary Artery - increased detail
+            const pulmonaryGeometry = new THREE.CylinderGeometry(0.22, 0.28, 1.4, 20);
+            const pulmonaryMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xff9999,
+                flatShading: true,
+                shininess: 40
+            });
+            const pulmonaryArtery = new THREE.Mesh(pulmonaryGeometry, pulmonaryMaterial);
+            pulmonaryArtery.position.set(0.35, 1.5, 0.05);
+            pulmonaryArtery.rotation.z = -0.3;
+            pulmonaryArtery.userData = { name: 'pulmonaryArtery', clickable: true };
+            heartParts.pulmonaryArtery = pulmonaryArtery;
+            heart.add(pulmonaryArtery);
+
+            // Pulmonary Veins (left side) - increased detail
+            const veinGeometry = new THREE.CylinderGeometry(0.15, 0.18, 0.8, 16);
+            const veinMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xef9a9a,
+                flatShading: true,
+                shininess: 40
+            });
+            const pulmonaryVeinLeft = new THREE.Mesh(veinGeometry, veinMaterial);
+            pulmonaryVeinLeft.position.set(-1.0, 1.0, 0.4);
+            pulmonaryVeinLeft.rotation.z = 1.2;
+            pulmonaryVeinLeft.userData = { name: 'pulmonaryVeins', clickable: true };
+            heartParts.pulmonaryVeins = pulmonaryVeinLeft;
+            heart.add(pulmonaryVeinLeft);
+
+            // Vena Cava (superior) - increased detail
+            const venaCavaGeometry = new THREE.CylinderGeometry(0.25, 0.22, 1.0, 16);
+            const venaCavaMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xffccbc,
+                flatShading: true,
+                shininess: 40
+            });
+            const venaCava = new THREE.Mesh(venaCavaGeometry, venaCavaMaterial);
+            venaCava.position.set(0.85, 1.6, 0.3);
+            venaCava.rotation.z = -0.4;
+            venaCava.userData = { name: 'venaCava', clickable: true };
+            heartParts.venaCava = venaCava;
+            heart.add(venaCava);
+
+            // Apex - increased detail
+            const apexGeometry = new THREE.SphereGeometry(0.45, 20, 20);
+            apexGeometry.scale(0.7, 1.3, 0.7);
+            const apexMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xb71c1c,
+                flatShading: true,
+                shininess: 40
+            });
+            const apex = new THREE.Mesh(apexGeometry, apexMaterial);
+            apex.position.set(-0.15, -1.4, 0);
+            apex.userData = { name: 'apex', clickable: true };
+            heartParts.apex = apex;
+            heart.add(apex);
+
+            scene.add(heart);
+        }
+
+        function createLabels() {
+            const labelData = [
+                { name: 'aorta', text: 'Aorta', offset: { x: -90, y: -140 } },
+                { name: 'pulmonaryArtery', text: 'Pulmonary Artery', offset: { x: 70, y: -120 } },
+                { name: 'leftAtrium', text: 'Left Atrium', offset: { x: -130, y: -20 } },
+                { name: 'rightAtrium', text: 'Right Atrium', offset: { x: 130, y: -20 } },
+                { name: 'leftVentricle', text: 'Left Ventricle', offset: { x: -110, y: 50 } },
+                { name: 'rightVentricle', text: 'Right Ventricle', offset: { x: 110, y: 60 } },
+                { name: 'pulmonaryVeins', text: 'Pulmonary Veins', offset: { x: -140, y: 20 } },
+                { name: 'venaCava', text: 'Vena Cava', offset: { x: 150, y: -80 } },
+                { name: 'septum', text: 'Septum', offset: { x: 0, y: 40 } },
+                { name: 'apex', text: 'Apex', offset: { x: -30, y: 130 } }
+            ];
+
+            labelData.forEach(data => {
+                const label = document.createElement('div');
+                label.className = 'label';
+                label.textContent = data.text;
+                label.dataset.part = data.name;
+                label.dataset.offsetX = data.offset.x;
+                label.dataset.offsetY = data.offset.y;
+                label.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showDescription(data.name);
+                });
+                document.body.appendChild(label);
+                labels.push(label);
+            });
+        }
+
+        let beatTime = 0;
+        let bpm = 72;
+        let beatDuration = 60 / bpm; // seconds per beat (synced to ECG & 3D beat)
+
+        function animateHeartbeat(delta) {
+            beatTime += delta;
+            const cycle = beatTime % beatDuration;
+            const phase = cycle / beatDuration;
+
+            // Realistic cardiac cycle with smooth transitions
+            let ventricleScale, atriumScale;
+            
+            // Atrial systole (atria contract first)
+            if (phase < 0.1) {
+                const t = phase / 0.1;
+                const easeOut = 1 - Math.pow(1 - t, 3);
+                atriumScale = 1.0 - easeOut * 0.12;
+                ventricleScale = 1.0 + easeOut * 0.08; // Ventricles fill
+            }
+            // Isovolumetric contraction
+            else if (phase < 0.15) {
+                atriumScale = 0.88;
+                ventricleScale = 1.08;
+            }
+            // Ventricular systole (ventricles contract)
+            else if (phase < 0.35) {
+                const t = (phase - 0.15) / 0.2;
+                const easeInOut = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                ventricleScale = 1.08 - easeInOut * 0.28;
+                atriumScale = 0.88 + easeInOut * 0.17; // Atria start relaxing
+            }
+            // Isovolumetric relaxation
+            else if (phase < 0.4) {
+                ventricleScale = 0.80;
+                atriumScale = 1.05;
+            }
+            // Ventricular filling (diastole)
+            else if (phase < 0.7) {
+                const t = (phase - 0.4) / 0.3;
+                const easeOut = 1 - Math.pow(1 - t, 2);
+                ventricleScale = 0.80 + easeOut * 0.22;
+                atriumScale = 1.05 + easeOut * 0.0;
+            }
+            // Diastasis (rest period)
+            else {
+                const t = (phase - 0.7) / 0.3;
+                const easeInOut = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                ventricleScale = 1.02 - easeInOut * 0.02;
+                atriumScale = 1.05 - easeInOut * 0.05;
+            }
+
+            // Apply smooth beating
+            if (heartParts.leftVentricle) {
+                heartParts.leftVentricle.scale.set(ventricleScale, ventricleScale, ventricleScale);
+            }
+            if (heartParts.rightVentricle) {
+                heartParts.rightVentricle.scale.set(ventricleScale * 0.98, ventricleScale * 0.98, ventricleScale * 0.98);
+            }
+            if (heartParts.leftAtrium) {
+                heartParts.leftAtrium.scale.set(atriumScale, atriumScale, atriumScale);
+            }
+            if (heartParts.rightAtrium) {
+                heartParts.rightAtrium.scale.set(atriumScale, atriumScale, atriumScale);
+            }
+        }
+
+        function updateLabels() {
+            Object.keys(heartParts).forEach(partName => {
+                const part = heartParts[partName];
+                const label = labels.find(l => l.dataset.part === partName);
+                if (label && part) {
+                    const vector = new THREE.Vector3();
+                    part.getWorldPosition(vector);
+                    vector.project(camera);
+
+                    const partX = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                    const partY = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+
+                    const labelX = partX + parseInt(label.dataset.offsetX);
+                    const labelY = partY + parseInt(label.dataset.offsetY);
+
+                    label.style.left = labelX + 'px';
+                    label.style.top = labelY + 'px';
+                    
+                    label.style.opacity = vector.z < 1 ? '1' : '0.3';
+                    
+                    if (selectedPart === partName) {
+                        label.classList.add('highlighted');
+                        
+                        // Calculate line from label to heart part
+                        const dx = partX - labelX;
+                        const dy = partY - labelY;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        
+                        // Update line
+                        const line = label.querySelector('::before') || label;
+                        label.style.setProperty('--line-length', length + 'px');
+                        label.style.setProperty('--line-angle', angle + 'deg');
+                        
+                        const styleSheet = document.styleSheets[0];
+                        const labelClass = `.label.highlighted::before`;
+                        // Remove old rule if exists
+                        for (let i = styleSheet.cssRules.length - 1; i >= 0; i--) {
+                            if (styleSheet.cssRules[i].selectorText === labelClass) {
+                                styleSheet.deleteRule(i);
+                            }
+                        }
+                        // Add new rule with line
+                        styleSheet.insertRule(`
+                            ${labelClass} {
+                                height: ${length}px;
+                                transform: rotate(${angle}deg);
+                                left: 0;
+                                top: 50%;
+                            }
+                        `, styleSheet.cssRules.length);
+                    } else {
+                        label.classList.remove('highlighted');
+                    }
+                }
+            });
+        }
+
+        function toggleDragMode() {
+            dragEnabled = !dragEnabled;
+            const toggleBtn = document.getElementById('rotation-toggle');
+            if (dragEnabled) {
+                toggleBtn.textContent = '🔓 Rotation Enabled';
+                toggleBtn.classList.add('active');
+                renderer.domElement.style.cursor = 'grab';
+            } else {
+                toggleBtn.textContent = '🔒 Click to Enable Rotation';
+                toggleBtn.classList.remove('active');
+                renderer.domElement.style.cursor = 'pointer';
+            }
+        }
+
+        let mouseDownTime = 0;
+        let mouseDownPos = { x: 0, y: 0 };
+
+        function onMouseDown(e) {
+            if (!dragEnabled) return;
+            
+            isDragging = true;
+            mouseDownTime = Date.now();
+            mouseDownPos = { x: e.clientX, y: e.clientY };
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+            renderer.domElement.style.cursor = 'grabbing';
+        }
+
+        function onMouseMove(e) {
+            if (!dragEnabled || !isDragging) return;
+            
+            const dx = e.clientX - previousMousePosition.x;
+            const dy = e.clientY - previousMousePosition.y;
+
+            rotation.y += dx * 0.005;
+            rotation.x += dy * 0.005;
+
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            if (dragEnabled) {
+                renderer.domElement.style.cursor = 'grab';
+            }
+        }
+
+        function onCanvasClick(e) {
+            // Don't process clicks if rotation mode is enabled (only for rotating)
+            if (dragEnabled) {
+                return;
+            }
+            
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(heart.children, true);
+
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+                if (clickedObject.userData.clickable) {
+                    showDescription(clickedObject.userData.name);
+                    e.stopPropagation();
+                    return;
+                }
+            }
+        }
+
+        function onDocumentClick(e) {
+            // Check if click is on description box, labels, or toggle button
+            const descBox = document.getElementById('description');
+            const toggleBtn = document.getElementById('rotation-toggle');
+            
+            if (descBox.contains(e.target) || 
+                toggleBtn.contains(e.target) ||
+                e.target.classList.contains('label')) {
+                return;
+            }
+            
+            // Click was outside these elements, hide description
+            hideDescription();
+        }
+
+        function showDescription(partName) {
+            selectedPart = partName;
+            const info = partDescriptions[partName];
+            if (info) {
+                const descDiv = document.getElementById('description');
+                descDiv.innerHTML = `<h2>${info.name}</h2><p>${info.description}</p>`;
+                descDiv.style.display = 'block';
+            }
+        }
+
+        function hideDescription() {
+            selectedPart = null;
+            document.getElementById('description').style.display = 'none';
+        }
+
+        function onWheel(e) {
+            e.preventDefault();
+            camera.position.z += e.deltaY * 0.01;
+            camera.position.z = Math.max(3, Math.min(12, camera.position.z));
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        let lastTime = 0;
+        function animate(currentTime) {
+            requestAnimationFrame(animate);
+
+            const delta = currentTime ? (currentTime - lastTime) / 1000 : 0.016;
+            lastTime = currentTime || 0;
+
+            if (delta > 0 && delta < 1) {
+                animateHeartbeat(delta);
+                renderECG(delta);
+            }
+
+            heart.rotation.x = rotation.x;
+            heart.rotation.y = rotation.y;
+
+            updateLabels();
+            renderer.render(scene, camera);
+        }
+
+        
+        /* =============================
+           ECG + RHYTHM (added)
+           ============================= */
+        
+        const rhythmProfiles = {
+            normal: {
+                label: "Normal",
+                bpm: 72,
+                note: "Regular rhythm with a typical PQRST complex.",
+                wave: { p: 0.12, q: -0.15, r: 1.0, s: -0.35, t: 0.32, st: 0.0 },
+                timing: { p: 0.18, q: 0.36, r: 0.40, s: 0.43, t: 0.68, stStart: 0.46, stEnd: 0.62 },
+                widths: { p: 0.025, q: 0.012, r: 0.008, s: 0.014, t: 0.055 },
+                jitter: 0.0
+            },
+            tachy: {
+                label: "Tachycardia",
+                bpm: 135,
+                note: "Faster rhythm. Shorter intervals. Slightly shorter P and T.",
+                wave: { p: 0.08, q: -0.12, r: 0.95, s: -0.30, t: 0.20, st: 0.0 },
+                // Pull everything earlier to emphasize shortened cycle
+                timing: { p: 0.15, q: 0.32, r: 0.36, s: 0.39, t: 0.58, stStart: 0.42, stEnd: 0.54 },
+                widths: { p: 0.020, q: 0.011, r: 0.008, s: 0.013, t: 0.045 },
+                jitter: 0.02
+            },
+            brady: {
+                label: "Bradycardia",
+                bpm: 45,
+                note: "Slower rhythm. Longer pauses. Slightly broader T wave.",
+                wave: { p: 0.14, q: -0.16, r: 1.05, s: -0.38, t: 0.36, st: 0.0 },
+                // Push T later to show longer repolarization period visually
+                timing: { p: 0.20, q: 0.38, r: 0.42, s: 0.45, t: 0.74, stStart: 0.50, stEnd: 0.66 },
+                widths: { p: 0.028, q: 0.013, r: 0.009, s: 0.015, t: 0.070 },
+                jitter: 0.01
+            },
+            attack: {
+                label: "Heart attack (ST elevation demo)",
+                bpm: 95,
+                note: "Educational demo: elevated ST segment and inverted T wave.",
+                wave: { p: 0.10, q: -0.15, r: 0.95, s: -0.32, t: -0.22, st: 0.32 },
+                timing: { p: 0.18, q: 0.36, r: 0.40, s: 0.43, t: 0.70, stStart: 0.46, stEnd: 0.64 },
+                widths: { p: 0.025, q: 0.012, r: 0.008, s: 0.014, t: 0.060 },
+                jitter: 0.03
+            }
+        };
+
+
+        let rhythmMode = "normal";
+
+        const ecg = {
+            canvas: null,
+            ctx: null,
+            t: 0,          // seconds
+            buffer: [],    // y-values per pixel
+            speed: 140,    // px/sec baseline
+            dropThisBeat: false
+        };
+
+        function gauss(x, mu, sigma) {
+            const z = (x - mu) / sigma;
+            return Math.exp(-0.5 * z * z);
+        }
+
+        function pqrstWave(phase, profile) {
+            const drift = 0.03 * Math.sin(2 * Math.PI * phase) + 0.015 * Math.sin(2 * Math.PI * phase * 3);
+
+            const tm = profile.timing || { p:0.18, q:0.36, r:0.40, s:0.43, t:0.68, stStart:0.46, stEnd:0.62 };
+            const wd = profile.widths || { p:0.025, q:0.012, r:0.008, s:0.014, t:0.055 };
+
+            const p  = profile.wave.p * gauss(phase, tm.p, wd.p);
+            const q  = profile.wave.q * gauss(phase, tm.q, wd.q);
+            const r  = profile.wave.r * gauss(phase, tm.r, wd.r);
+            const s  = profile.wave.s * gauss(phase, tm.s, wd.s);
+            const t  = profile.wave.t * gauss(phase, tm.t, wd.t);
+
+            // ST elevation/segment: plateau between S and T
+            const stPlateau = profile.wave.st * (phase > tm.stStart && phase < tm.stEnd ? 1 : 0);
+
+            const noise = (Math.random() - 0.5) * 2 * (profile.jitter || 0);
+            return drift + p + q + r + s + stPlateau + t + noise;
+        }
+
+        function sampleECG(seconds) {
+            const profile = rhythmProfiles[rhythmMode];
+            const phase = (seconds % beatDuration) / beatDuration;
+            return pqrstWave(phase, profile);
+        }
+
+        function resizeEcgCanvas() {
+            const canvas = ecg.canvas;
+            const rect = canvas.getBoundingClientRect();
+            const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+            canvas.width = Math.floor(rect.width * dpr);
+            canvas.height = Math.floor(rect.height * dpr);
+
+            // draw using CSS pixels
+            ecg.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const wCss = Math.floor(rect.width);
+            const hCss = Math.floor(rect.height);
+            ecg.buffer = new Array(wCss).fill(hCss / 2);
+        }
+
+        function drawEcgGrid(ctx, w, h) {
+            ctx.save();
+            ctx.globalAlpha = 0.35;
+
+            const small = 10;
+            const big = 50;
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(239, 83, 80, 0.18)";
+            ctx.beginPath();
+            for (let x = 0; x <= w; x += small) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+            for (let y = 0; y <= h; y += small) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+            ctx.stroke();
+
+            ctx.strokeStyle = "rgba(198, 40, 40, 0.18)";
+            ctx.beginPath();
+            for (let x = 0; x <= w; x += big) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+            for (let y = 0; y <= h; y += big) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function renderECG(deltaSeconds) {
+            const canvas = ecg.canvas;
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.floor(rect.width);
+            const h = Math.floor(rect.height);
+
+            // Scroll speed tied gently to bpm
+            const bpmFactor = Math.min(1.6, Math.max(0.7, bpm / 72));
+            ecg.speed = 140 * bpmFactor;
+
+            const shiftPx = Math.max(1, Math.floor(ecg.speed * deltaSeconds));
+
+            for (let i = 0; i < shiftPx; i++) {
+                ecg.buffer.shift();
+                ecg.buffer.push(h / 2);
+            }
+
+            const amp = h * 0.32;
+            for (let i = 0; i < shiftPx; i++) {
+                const yNorm = sampleECG(ecg.t);
+                ecg.t += (1 / ecg.speed); // seconds per pixel
+                const y = (h / 2) - (yNorm * amp);
+                ecg.buffer[ecg.buffer.length - 1 - (shiftPx - 1 - i)] = y;
+            }
+
+            const ctx = ecg.ctx;
+            ctx.clearRect(0, 0, w, h);
+
+            drawEcgGrid(ctx, w, h);
+
+            // Wave
+            ctx.save();
+            ctx.lineWidth = 2.2;
+            ctx.strokeStyle = "#c62828";
+            ctx.shadowColor = "rgba(198, 40, 40, 0.35)";
+            ctx.shadowBlur = 8;
+
+            ctx.beginPath();
+            for (let x = 0; x < ecg.buffer.length; x++) {
+                const y = ecg.buffer[x];
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // Scanner dot
+            const xDot = w - 2;
+            const yDot = ecg.buffer[ecg.buffer.length - 1];
+            ctx.save();
+            ctx.fillStyle = "#b71c1c";
+            ctx.shadowColor = "rgba(198, 40, 40, 0.45)";
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(xDot, yDot, 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Labels near the first visible complex (approx positions)
+            ctx.save();
+            ctx.fillStyle = "rgba(0,0,0,0.55)";
+            ctx.font = "12px Arial";
+            const marks = [
+                { label: "P", x: w * 0.18 },
+                { label: "Q", x: w * 0.36 },
+                { label: "R", x: w * 0.40 },
+                { label: "S", x: w * 0.43 },
+                { label: "T", x: w * 0.68 },
+            ];
+            for (const m of marks) {
+                ctx.fillText(m.label, m.x, 16);
+            }
+            ctx.restore();
+        }
+
+        function applyRhythm(mode) {
+            rhythmMode = mode;
+            const profile = rhythmProfiles[mode];
+
+            bpm = profile.bpm;
+            beatDuration = 60 / bpm;
+
+            // Update UI text
+            const bpmText = `${Math.round(bpm)} bpm`;
+            const bpmEl = document.getElementById("ecg-bpm");
+            if (bpmEl) bpmEl.textContent = bpmText;
+
+            const bpmLabel = document.getElementById("bpmLabel");
+            if (bpmLabel) bpmLabel.textContent = bpmText;
+
+            const beatLabel = document.getElementById("beatLabel");
+            if (beatLabel) beatLabel.textContent = profile.label;
+
+            const meta = document.getElementById("rhythm-meta");
+            if (meta) meta.textContent = profile.note;
+
+            // Speed of the heart emoji animation
+            const heartEmoji = document.querySelector(".heartbeat");
+            if (heartEmoji) {
+                heartEmoji.style.animationDuration = `${Math.max(0.25, beatDuration)}s`;
+            }
+        }
+
+
+        init();
+        animate(0);
+    </script>
+</body>
+</html>
