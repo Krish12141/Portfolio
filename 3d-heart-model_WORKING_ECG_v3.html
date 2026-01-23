@@ -124,7 +124,7 @@
             line-height: 1.6;
         }
         #heartbeat-indicator {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
             color: #c62828;
@@ -134,6 +134,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             font-size: 14px;
             font-weight: bold;
+            z-index: 1200;
         }
         .heartbeat {
             display: inline-block;
@@ -158,7 +159,8 @@
         #rhythm-panel {
             position: fixed;
             left: 20px;
-            bottom: 20px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #c62828;
             background: rgba(255, 255, 255, 0.9);
             padding: 12px 14px;
@@ -166,7 +168,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             font-size: 13px;
             min-width: 240px;
-            z-index: 1000;
+            z-index: 1100;
         }
         #rhythm-panel label {
             display: block;
@@ -279,17 +281,15 @@
                 <option value="attack">Heart attack (ST elevation demo)</option>
             </select>
             <div id="rhythm-meta"></div>
-        
+        </div>
 
-    <div id="top-right-stack">
         <div id="heartbeat-indicator">
-            <span class="heartbeat">❤️</span> <span id="beatLabel">Beating</span> <span id="bpmLabel" style="margin-left:8px;color:#666;font-weight:600;">72 bpm</span>
+            <span class="heartbeat">❤️</span>
+            <span id="beatLabel">Normal</span>
+            <span id="bpmLabel" style="margin-left:8px;color:#666;font-weight:600;">72 bpm</span>
         </div>
 
-        </div>
-    </div>
-
-    <div id="ecg-drawer" class="open" aria-label="ECG Panel">
+<div id="ecg-drawer" class="open" aria-label="ECG Panel">
         <div id="ecg-header" role="button" aria-controls="ecg-body" aria-expanded="true">
             <div id="ecg-title">🫀 ECG (PQRST)</div>
             <button id="ecg-toggle" type="button">Hide</button>
@@ -913,7 +913,9 @@
             t: 0,          // seconds
             buffer: [],    // y-values per pixel
             speed: 140,    // px/sec baseline
-            dropThisBeat: false
+            dropThisBeat: false,
+            labelState: null,
+            shiftAcc: 0
         };
 
         function gauss(x, mu, sigma) {
@@ -995,22 +997,30 @@
             const bpmFactor = Math.min(1.6, Math.max(0.7, bpm / 72));
             ecg.speed = 140 * bpmFactor;
 
-            const shiftPx = Math.max(1, Math.floor(ecg.speed * deltaSeconds));
+            // Smooth scrolling: accumulate fractional pixels so motion doesn't jump
+            ecg.shiftAcc += ecg.speed * deltaSeconds;
+            const shiftPx = Math.floor(ecg.shiftAcc);
+            ecg.shiftAcc -= shiftPx;
 
-            for (let i = 0; i < shiftPx; i++) {
-                ecg.buffer.shift();
-                ecg.buffer.push(h / 2);
+            if (shiftPx > 0) {
+                for (let i = 0; i < shiftPx; i++) {
+                    ecg.buffer.shift();
+                    ecg.buffer.push(h / 2);
+                }
+
+                const amp = h * 0.32;
+                for (let i = 0; i < shiftPx; i++) {
+                    const yNorm = sampleECG(ecg.t);
+                    ecg.t += (1 / ecg.speed); // seconds per pixel
+                    const y = (h / 2) - (yNorm * amp);
+                    ecg.buffer[ecg.buffer.length - 1 - (shiftPx - 1 - i)] = y;
+                }
+            } else {
+                // Advance time slightly for smooth evolution even if no pixel shift this frame
+                ecg.t += deltaSeconds * (bpm / 60) * 0.02;
             }
 
-            const amp = h * 0.32;
-            for (let i = 0; i < shiftPx; i++) {
-                const yNorm = sampleECG(ecg.t);
-                ecg.t += (1 / ecg.speed); // seconds per pixel
-                const y = (h / 2) - (yNorm * amp);
-                ecg.buffer[ecg.buffer.length - 1 - (shiftPx - 1 - i)] = y;
-            }
-
-            const ctx = ecg.ctx;
+const ctx = ecg.ctx;
             ctx.clearRect(0, 0, w, h);
 
             drawEcgGrid(ctx, w, h);
@@ -1043,22 +1053,116 @@
             ctx.fill();
             ctx.restore();
 
-            // Labels near the first visible complex (approx positions)
+            // Labels that follow the actual trace points (peak detection) with smoothing (P,Q,R,S,T,ST)
             ctx.save();
-            ctx.fillStyle = "rgba(0,0,0,0.55)";
-            ctx.font = "12px Arial";
-            const marks = [
-                { label: "P", x: w * 0.18 },
-                { label: "Q", x: w * 0.36 },
-                { label: "R", x: w * 0.40 },
-                { label: "S", x: w * 0.43 },
-                { label: "T", x: w * 0.68 },
-            ];
-            for (const m of marks) {
-                ctx.fillText(m.label, m.x, 16);
+
+            // Estimate pixels per beat from current scroll speed and beatDuration
+            const ppb = Math.max(120, Math.min(w * 0.9, ecg.speed * beatDuration)); // pixels per beat
+            const endX = w - 14;
+            const startX = Math.max(14, Math.floor(endX - ppb));
+
+            // Helpers
+            const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+            const yAt = (x) => ecg.buffer[clamp(x, 0, ecg.buffer.length - 1)] ?? (h / 2);
+
+            function argMin(x0, x1) {
+                let bestX = x0, bestY = Infinity;
+                for (let x = x0; x <= x1; x++) {
+                    const y = yAt(x);
+                    if (y < bestY) { bestY = y; bestX = x; }
+                }
+                return bestX;
             }
+            function argMax(x0, x1) {
+                let bestX = x0, bestY = -Infinity;
+                for (let x = x0; x <= x1; x++) {
+                    const y = yAt(x);
+                    if (y > bestY) { bestY = y; bestX = x; }
+                }
+                return bestX;
+            }
+
+            // Find R peak as the highest upward deflection (minimum y) in the beat window
+            const rX = argMin(startX, endX);
+
+            // Find Q (downward notch before R) as local max y in a small window before R
+            const q0 = clamp(Math.floor(rX - ppb * 0.14), startX, endX);
+            const q1 = clamp(Math.floor(rX - ppb * 0.03), startX, endX);
+            const qX = (q1 > q0) ? argMax(q0, q1) : clamp(rX - 6, startX, endX);
+
+            // Find S (downward notch after R)
+            const s0 = clamp(Math.floor(rX + ppb * 0.02), startX, endX);
+            const s1 = clamp(Math.floor(rX + ppb * 0.16), startX, endX);
+            const sX = (s1 > s0) ? argMax(s0, s1) : clamp(rX + 6, startX, endX);
+
+            // Find P (small upward bump before Q) as min y in early portion
+            const p0 = startX;
+            const p1 = clamp(Math.floor(qX - ppb * 0.12), startX, endX);
+            const pX = (p1 > p0) ? argMin(p0, p1) : clamp(qX - 18, startX, endX);
+
+            // Find T (upward wave after S) as min y later in window
+            const t0 = clamp(Math.floor(sX + ppb * 0.10), startX, endX);
+            const t1 = endX;
+            const tX = (t1 > t0) ? argMin(t0, t1) : clamp(sX + 40, startX, endX);
+
+            // ST label point: midpoint between S and T (on the plateau)
+            const stX = clamp(Math.floor((sX + tX) / 2), startX, endX);
+
+            const raw = {
+                P: { x: pX, y: yAt(pX) },
+                Q: { x: qX, y: yAt(qX) },
+                R: { x: rX, y: yAt(rX) },
+                S: { x: sX, y: yAt(sX) },
+                ST: { x: stX, y: yAt(stX) },
+                T: { x: tX, y: yAt(tX) }
+            };
+
+            // Smooth positions to prevent "glitchy" label jumping
+            if (!ecg.labelState) {
+                ecg.labelState = JSON.parse(JSON.stringify(raw));
+            } else {
+                const a = 0.18; // smoothing factor (smoother)
+                for (const k of Object.keys(raw)) {
+                    ecg.labelState[k].x = ecg.labelState[k].x + a * (raw[k].x - ecg.labelState[k].x);
+                    ecg.labelState[k].y = ecg.labelState[k].y + a * (raw[k].y - ecg.labelState[k].y);
+                }
+            }
+
+            function drawLabel(text, pt, dx, dy) {
+                const x = pt.x, y = pt.y;
+                const tx = x + dx;
+                const ty = y + dy;
+
+                // leader line
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "rgba(0,0,0,0.35)";
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+
+                // dot on trace
+                ctx.fillStyle = "rgba(198, 40, 40, 0.95)";
+                ctx.beginPath();
+                ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // text
+                ctx.fillStyle = "rgba(0,0,0,0.78)";
+                ctx.font = "12px Arial";
+                ctx.fillText(text, tx + 2, ty + 4);
+            }
+
+            // Offsets arranged like the reference diagram
+            drawLabel("P",  ecg.labelState.P,  -10, -18);
+            drawLabel("Q",  ecg.labelState.Q,  -12,  20);
+            drawLabel("R",  ecg.labelState.R,   -6, -26);
+            drawLabel("S",  ecg.labelState.S,  -12,  22);
+            drawLabel("ST", ecg.labelState.ST, -10, -18);
+            drawLabel("T",  ecg.labelState.T,   -6, -18);
+
             ctx.restore();
-        }
+}
 
         function applyRhythm(mode) {
             rhythmMode = mode;
