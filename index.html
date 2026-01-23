@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -466,6 +465,7 @@
             box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
             transition: all 0.3s ease;
             z-index: 1000;
+            display: none;
         }
 
         .edit-mode-toggle:hover {
@@ -473,47 +473,119 @@
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
         }
 
-        .profile-photo-container {
-            position: relative;
+        .admin-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .admin-panel.open {
+            right: 0;
+        }
+
+        .admin-panel-header {
+            background: #ff6b35;
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-panel-content {
+            padding: 2rem;
+        }
+
+        .admin-login {
             display: flex;
             flex-direction: column;
-            align-items: center;
             gap: 1rem;
         }
 
-        .profile-photo {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid #ff6b35;
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
-            transition: all 0.3s ease;
-            animation: fadeInScale 0.8s ease;
+        .admin-login input {
+            padding: 0.75rem;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            font-size: 1rem;
         }
 
-        .profile-photo:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
+        .admin-login input:focus {
+            outline: none;
+            border-color: #ff6b35;
         }
 
-        .upload-photo-btn {
+        .admin-login button {
             background: #ff6b35;
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem;
             border: none;
-            border-radius: 25px;
-            font-size: 0.9rem;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .upload-photo-btn:hover {
+        .admin-login button:hover {
             background: #ff5722;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
         }
+
+        .admin-controls {
+            display: none;
+        }
+
+        .admin-controls.active {
+            display: block;
+        }
+
+        .admin-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .admin-section h3 {
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .admin-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #ff6b35;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1999;
+        }
+
+        .admin-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .close-panel {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+
 
         .page-transition {
             animation: pageTransition 0.6s ease;
@@ -521,7 +593,38 @@
     </style>
 </head>
 <body>
-    <button class="edit-mode-toggle" onclick="toggleEditMode()">✏️ Edit Mode: OFF</button>
+    <button class="admin-toggle" onclick="toggleAdminPanel()">⚙️</button>
+
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-panel-header">
+            <h2>Admin Panel</h2>
+            <button class="close-panel" onclick="toggleAdminPanel()">✕</button>
+        </div>
+        <div class="admin-panel-content">
+            <div class="admin-login" id="adminLogin">
+                <h3>Login Required</h3>
+                <input type="password" id="adminPassword" placeholder="Enter password">
+                <button onclick="adminLogin()">Login</button>
+                <p id="loginError" style="color: #dc3545; display: none;">Incorrect password</p>
+            </div>
+            <div class="admin-controls" id="adminControls">
+                <div class="admin-section">
+                    <h3>Edit Mode</h3>
+                    <button class="add-btn" onclick="toggleEditMode()">Toggle Edit Mode</button>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">Status: <span id="editModeStatus">OFF</span></p>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Actions</h3>
+                    <button class="add-btn" onclick="addResearchCard()" style="display: block; margin-bottom: 0.5rem;">Add Research Project</button>
+                    <button class="add-btn" onclick="addHobbyCard()" style="display: block;">Add Hobby</button>
+                </div>
+                <div class="admin-section">
+                    <button class="delete-btn" onclick="adminLogout()" style="display: block;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <nav class="nav">
         <div class="nav-content">
@@ -538,12 +641,7 @@
     <section id="home" class="hero">
         <div style="display: flex; align-items: center; gap: 3rem; flex-wrap: wrap;">
             <div class="profile-photo-container">
-                <img id="profilePhoto" src="https://via.placeholder.com/200" alt="Profile Photo" class="profile-photo">
-                <input type="file" id="photoUpload" accept="image/*" style="display: none;">
-                <button class="upload-photo-btn" onclick="document.getElementById('photoUpload').click()">
-                    📷 Upload Photo
-                </button>
-            </div>
+                <img id="profilePhoto" src="data:image/jpeg;base64,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
             <div>
                 <h1 class="editable" contenteditable="false" data-field="name">Krish Madhavan</h1>
                 <p class="editable" contenteditable="false" data-field="bio">Student and researcher at California Polytechnic State University, San Luis Obispo. Passionate about exploring innovative research methodologies and pushing the boundaries of knowledge through interdisciplinary collaboration and creative problem-solving.</p>
@@ -637,6 +735,9 @@
 
     <script>
         let editMode = false;
+        let isAdminLoggedIn = false;
+        const ADMIN_PASSWORD = 'Peepoo134!';
+        
         let portfolioData = {
             name: 'Krish Madhavan',
             bio: 'Student and researcher at California Polytechnic State University, San Luis Obispo. Passionate about exploring innovative research methodologies and pushing the boundaries of knowledge through interdisciplinary collaboration and creative problem-solving.',
@@ -647,6 +748,45 @@
 
         // Load saved data on page load
         window.addEventListener('load', loadData);
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('open');
+        }
+
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            const error = document.getElementById('loginError');
+            
+            if (password === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true;
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminControls').classList.add('active');
+                error.style.display = 'none';
+            } else {
+                error.style.display = 'block';
+            }
+        }
+
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            editMode = false;
+            document.getElementById('adminLogin').style.display = 'flex';
+            document.getElementById('adminControls').classList.remove('active');
+            document.getElementById('adminPassword').value = '';
+            
+            // Turn off edit mode
+            const editables = document.querySelectorAll('.editable');
+            const linkInputs = document.querySelectorAll('.link-input');
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            
+            editables.forEach(el => el.contentEditable = false);
+            linkInputs.forEach(input => input.style.display = 'none');
+            deleteBtns.forEach(btn => btn.style.display = 'none');
+            
+            document.getElementById('editModeStatus').textContent = 'OFF';
+            toggleAdminPanel();
+        }
 
         function saveData() {
             // Save all editable content
@@ -682,24 +822,24 @@
             console.log('Data loaded:', portfolioData);
         }
 
-        // Save data whenever content changes
+        // Auto-save data whenever ANY content changes
         document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('editable')) {
+            if (e.target.classList.contains('editable') || e.target.classList.contains('link-input')) {
                 saveData();
             }
         });
 
-        // Photo upload functionality
-        document.getElementById('photoUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    portfolioData.photo = event.target.result;
-                    document.getElementById('profilePhoto').src = event.target.result;
-                    saveData();
-                };
-                reader.readAsDataURL(file);
+        // Auto-save on blur (when user clicks away from editable element)
+        document.addEventListener('blur', function(e) {
+            if (e.target.classList.contains('editable')) {
+                saveData();
+            }
+        }, true);
+
+        // Auto-save when user presses Enter or deletes content
+        document.addEventListener('keyup', function(e) {
+            if (e.target.classList.contains('editable')) {
+                saveData();
             }
         });
 
@@ -741,31 +881,26 @@
         });
 
         function toggleEditMode() {
+            if (!isAdminLoggedIn) return;
+            
             editMode = !editMode;
-            const btn = document.querySelector('.edit-mode-toggle');
             const editables = document.querySelectorAll('.editable');
-            const addBtns = document.querySelectorAll('.add-btn');
-            const deleteBtns = document.querySelectorAll('.delete-btn');
             const linkInputs = document.querySelectorAll('.link-input');
+            const deleteBtns = document.querySelectorAll('.delete-btn');
 
             editables.forEach(el => {
                 el.contentEditable = editMode;
-            });
-
-            addBtns.forEach(btn => {
-                btn.style.display = editMode ? 'block' : 'none';
-            });
-
-            deleteBtns.forEach(btn => {
-                btn.style.display = editMode ? 'inline-block' : 'none';
             });
 
             linkInputs.forEach(input => {
                 input.style.display = editMode ? 'block' : 'none';
             });
 
-            btn.textContent = editMode ? '💾 Edit Mode: ON' : '✏️ Edit Mode: OFF';
-            btn.style.background = editMode ? '#28a745' : '#ff6b35';
+            deleteBtns.forEach(btn => {
+                btn.style.display = editMode ? 'inline-block' : 'none';
+            });
+
+            document.getElementById('editModeStatus').textContent = editMode ? 'ON' : 'OFF';
         }
 
         function addResearchCard() {
