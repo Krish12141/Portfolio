@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1106,14 +1106,12 @@ const ctx = ecg.ctx;
             const tX = (t1 > t0) ? argMin(t0, t1) : clamp(sX + 40, startX, endX);
 
             // ST label point: midpoint between S and T (on the plateau)
-            const stX = clamp(Math.floor((sX + tX) / 2), startX, endX);
 
             const raw = {
                 P: { x: pX, y: yAt(pX) },
                 Q: { x: qX, y: yAt(qX) },
                 R: { x: rX, y: yAt(rX) },
                 S: { x: sX, y: yAt(sX) },
-                ST: { x: stX, y: yAt(stX) },
                 T: { x: tX, y: yAt(tX) }
             };
 
@@ -1158,7 +1156,6 @@ const ctx = ecg.ctx;
             drawLabel("Q",  ecg.labelState.Q,  -12,  20);
             drawLabel("R",  ecg.labelState.R,   -6, -26);
             drawLabel("S",  ecg.labelState.S,  -12,  22);
-            drawLabel("ST", ecg.labelState.ST, -10, -18);
             drawLabel("T",  ecg.labelState.T,   -6, -18);
 
             ctx.restore();
