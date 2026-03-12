@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synap Step — Neurological Movement Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #071a3e;
+      --blue: #1847c2;
+      --sky: #4a90e2;
+      --light: #e8f1ff;
+      --pale: #f4f8ff;
+      --white: #ffffff;
+      --text: #0f1f3d;
+      --muted: #5a6a8a;
+      --border: #dce8f5;
+      --accent: #0ea5e9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: "Outfit", sans-serif; color: var(--text); background: var(--white); line-height: 1.7; overflow-x: hidden; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 6%; height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(220,232,245,0.6);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+    .nav-logo img { width: 38px; height: 38px; border-radius: 8px; }
+    .nav-logo span { font-family: "Fraunces", serif; font-size: 1.5rem; color: var(--navy); font-weight: 600; letter-spacing: -0.03em; }
+    .nav-logo span em { color: var(--blue); font-style: normal; }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--navy); }
+    .nav-cta { background: var(--navy) !important; color: white !important; padding: 0.55rem 1.4rem !important; border-radius: 100px; font-weight: 600 !important; }
+    .nav-cta:hover { background: var(--blue) !important; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; background: var(--navy);
+      display: flex; align-items: center;
+      padding: 110px 6% 80px; position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 85% 50%, rgba(24,71,194,0.35) 0%, transparent 65%),
+                  radial-gradient(ellipse 40% 40% at 20% 80%, rgba(14,165,233,0.1) 0%, transparent 60%);
+    }
+    .hero-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1.1fr 0.9fr;
+      gap: 4rem; align-items: center; position: relative; z-index: 1;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(14,165,233,0.15); border: 1px solid rgba(14,165,233,0.3);
+      color: #7dd3fc; font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.4rem 1rem; border-radius: 100px; margin-bottom: 1.75rem;
+    }
+    .hero-tag::before {
+      content: ""; width: 6px; height: 6px;
+      background: #7dd3fc; border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .hero h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(3.2rem, 5.5vw, 5.8rem);
+      color: white; line-height: 1.0;
+      letter-spacing: -0.04em; font-weight: 300; margin-bottom: 1.75rem;
+    }
+    .hero h1 em { font-style: italic; color: #93c5fd; }
+    .hero h1 strong { font-weight: 600; display: block; }
+    .hero-desc { color: #8ba4c8; font-size: 1rem; font-weight: 300; max-width: 480px; margin-bottom: 2.5rem; line-height: 1.85; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-solid {
+      background: var(--blue); color: white; padding: 0.9rem 2.2rem;
+      border-radius: 100px; font-weight: 600; font-size: 0.9rem;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.25s; letter-spacing: 0.02em; display: inline-block;
+    }
+    .btn-solid:hover { background: #2255d4; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(24,71,194,0.5); }
+    .btn-outline {
+      background: transparent; color: #93c5fd; padding: 0.9rem 2.2rem;
+      border-radius: 100px; font-weight: 500; font-size: 0.9rem;
+      text-decoration: none; border: 1px solid rgba(147,197,253,0.3);
+      transition: all 0.25s; display: inline-block;
+    }
+    .btn-outline:hover { border-color: rgba(147,197,253,0.7); background: rgba(147,197,253,0.05); }
+
+    /* HERO VISUAL */
+    .hero-visual { display: flex; justify-content: center; }
+    .device-mockup {
+      width: 290px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 36px; padding: 2rem 1.5rem;
+      display: flex; flex-direction: column; gap: 1.25rem;
+      animation: floatY 5s ease-in-out infinite; position: relative;
+    }
+    @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    .mock-header { display: flex; align-items: center; gap: 0.75rem; }
+    .mock-header img { width: 32px; height: 32px; border-radius: 8px; }
+    .mock-header-text { font-family: "Fraunces", serif; font-size: 1rem; color: white; font-weight: 400; }
+    .mock-bar { height: 3px; border-radius: 100px; background: linear-gradient(90deg, var(--blue), var(--accent)); width: 55%; }
+    .mock-pulse {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.2);
+      border-radius: 14px; padding: 0.9rem 1rem;
+    }
+    .pulse-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(14,165,233,0.15); border: 2px solid rgba(14,165,233,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; animation: pulse-glow 2s ease-in-out infinite; }
+    @keyframes pulse-glow { 0%,100%{box-shadow:0 0 0 0 rgba(14,165,233,0.3)} 50%{box-shadow:0 0 0 8px rgba(14,165,233,0)} }
+    .pulse-info span { display: block; font-size: 0.72rem; color: #7dd3fc; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+    .pulse-info p { font-size: 0.8rem; color: #8ba4c8; margin: 0; }
+    .mock-modules { display: flex; flex-direction: column; gap: 0.6rem; }
+    .mock-mod {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px; padding: 0.7rem 0.9rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.78rem; color: #94a3b8;
+    }
+    .mock-mod-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: #4ade80; } .dot-blue { background: #60a5fa; } .dot-purple { background: #a78bfa; }
+    .mock-badge {
+      position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--blue); color: white; font-size: 0.7rem; font-weight: 600;
+      padding: 0.35rem 1.1rem; border-radius: 100px; white-space: nowrap; letter-spacing: 0.05em;
+    }
+
+    /* SECTIONS */
+    section { padding: 100px 6%; }
+    .inner { max-width: 1200px; margin: 0 auto; }
+    .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.75rem; }
+    .title { font-family: "Fraunces", serif; font-size: clamp(2rem, 3.5vw, 3.2rem); color: var(--navy); line-height: 1.1; letter-spacing: -0.025em; font-weight: 400; margin-bottom: 1.25rem; }
+    .subtitle { color: var(--muted); font-size: 1rem; max-width: 560px; line-height: 1.85; font-weight: 300; }
+
+    /* SVG ICON SYSTEM */
+    .icon-wrap { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .icon-wrap.light { background: var(--light); }
+    .icon-wrap.dark { background: var(--navy); }
+    .icon-wrap svg { width: 22px; height: 22px; }
+    .icon-lg { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+    .icon-lg.light { background: var(--light); }
+    .icon-lg svg { width: 26px; height: 26px; }
+    .icon-feat { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+    .icon-feat.light { background: var(--light); }
+    .icon-feat svg { width: 26px; height: 26px; }
+
+    /* ABOUT */
+    .about { background: var(--pale); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+    .about-body p { color: var(--muted); font-size: 0.97rem; line-height: 1.9; margin-bottom: 1rem; font-weight: 300; }
+    .callout { background: white; border-left: 3px solid var(--blue); border-radius: 0 14px 14px 0; padding: 1.25rem 1.5rem; margin-top: 1.5rem; }
+    .callout p { margin: 0 !important; font-size: 0.88rem !important; color: var(--text) !important; }
+    .about-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .acard { background: white; border: 1px solid var(--border); border-radius: 18px; padding: 1.4rem; display: flex; gap: 1rem; align-items: flex-start; transition: all 0.25s; }
+    .acard:hover { box-shadow: 0 6px 28px rgba(24,71,194,0.08); transform: translateX(4px); }
+    .acard h4 { font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-bottom: 0.2rem; }
+    .acard p { font-size: 0.83rem; color: var(--muted); margin: 0; line-height: 1.6; font-weight: 300; }
+
+    /* WHY */
+    .why { background: white; }
+    .why-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; margin-top: 3rem; }
+    .why-body p { color: var(--muted); font-size: 0.97rem; line-height: 1.9; margin-bottom: 1rem; font-weight: 300; }
+    .why-quote { font-family: "Fraunces", serif; font-size: 1.35rem; color: var(--navy); font-style: italic; font-weight: 300; line-height: 1.55; padding-top: 1.5rem; border-top: 2px solid var(--light); margin-top: 1.5rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat-box { background: var(--pale); border: 1px solid var(--border); border-radius: 18px; padding: 1.75rem 1.5rem; }
+    .stat-num { font-family: "Fraunces", serif; font-size: 2.4rem; color: var(--blue); display: block; line-height: 1; margin-bottom: 0.5rem; font-weight: 400; }
+    .stat-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.55; font-weight: 300; }
+
+    /* PROBLEM */
+    .problem { background: var(--navy); }
+    .problem .label { color: #7dd3fc; }
+    .problem .title { color: white; }
+    .problem-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.25rem; margin-top: 3rem; }
+    .pcard { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 2rem; transition: background 0.2s; }
+    .pcard:hover { background: rgba(255,255,255,0.07); }
+    .pnum { font-family: "Fraunces", serif; font-size: 3rem; color: rgba(74,144,226,0.25); font-weight: 300; line-height: 1; margin-bottom: 1rem; display: block; }
+    .pcard h3 { font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.6rem; }
+    .pcard p { font-size: 0.87rem; color: #7a94b8; line-height: 1.75; font-weight: 300; }
+
+    /* SOLUTION */
+    .solution { background: var(--pale); }
+    .sol-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 5rem; align-items: start; margin-top: 2rem; }
+    .sol-body p { color: var(--muted); font-size: 0.97rem; line-height: 1.9; margin-bottom: 1rem; font-weight: 300; }
+    .sol-list { list-style: none; margin-top: 1.5rem; }
+    .sol-list li { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text); font-weight: 300; }
+    .sol-list li:last-child { border-bottom: none; }
+    .chk { width: 20px; height: 20px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.6rem; flex-shrink: 0; margin-top: 2px; }
+    .pipeline { background: white; border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; }
+    .pipe-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 2rem; }
+    .pipe-step { display: flex; gap: 1.1rem; margin-bottom: 1.5rem; align-items: flex-start; }
+    .pipe-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .pipe-dot { width: 10px; height: 10px; background: var(--blue); border-radius: 50%; }
+    .pipe-line { width: 2px; background: var(--border); flex: 1; min-height: 24px; margin-top: 4px; }
+    .pipe-step:last-child .pipe-line { display: none; }
+    .pipe-tag { font-size: 0.7rem; font-weight: 600; color: var(--blue); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
+    .pipe-step p { font-size: 0.84rem; color: var(--muted); line-height: 1.65; font-weight: 300; margin: 0; }
+
+    /* BUILDING */
+    .building { background: white; }
+    .build-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin-top: 3rem; }
+    .bcard { border: 1px solid var(--border); border-radius: 22px; padding: 2rem; transition: all 0.25s; position: relative; overflow: hidden; }
+    .bcard::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--accent)); opacity: 0; transition: opacity 0.25s; }
+    .bcard:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.07); transform: translateY(-4px); }
+    .bcard:hover::after { opacity: 1; }
+    .bcard h3 { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin-bottom: 0.5rem; }
+    .bcard p { font-size: 0.84rem; color: var(--muted); line-height: 1.7; font-weight: 300; }
+    .build-note { background: var(--light); border-radius: 18px; padding: 1.5rem 2rem; margin-top: 2rem; display: flex; gap: 1rem; align-items: flex-start; }
+    .build-note p { font-size: 0.88rem; color: #1e40af; line-height: 1.7; font-weight: 400; margin: 0; }
+
+    /* FEATURES */
+    .features { background: var(--pale); }
+    .feat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-top: 3rem; }
+    .fcard { background: white; border: 1px solid var(--border); border-radius: 20px; padding: 1.75rem 1.5rem; text-align: center; transition: all 0.25s; }
+    .fcard:hover { box-shadow: 0 4px 20px rgba(24,71,194,0.08); transform: translateY(-3px); }
+    .fcard h4 { font-size: 0.88rem; font-weight: 600; color: var(--navy); margin-bottom: 0.4rem; }
+    .fcard p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
+
+    /* TEAM */
+    .team { background: white; }
+    .team-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.5rem; margin-top: 3rem; }
+    .tcard { border: 1px solid var(--border); border-radius: 24px; padding: 2rem 1.5rem; text-align: center; transition: all 0.3s; }
+    .tcard:hover { box-shadow: 0 8px 32px rgba(24,71,194,0.1); transform: translateY(-4px); }
+    .avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), var(--blue)); display: flex; align-items: center; justify-content: center; font-family: "Fraunces", serif; font-size: 1.5rem; color: white; margin: 0 auto 1.2rem; font-weight: 400; }
+    .tcard h3 { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin-bottom: 0.25rem; }
+    .tcard .role { font-size: 0.8rem; color: var(--blue); font-weight: 500; margin-bottom: 0.2rem; }
+    .tcard .yr { font-size: 0.75rem; color: var(--muted); font-weight: 300; }
+
+    /* COMMERCIAL */
+    .commercial { background: var(--navy); }
+    .commercial .label { color: #7dd3fc; }
+    .commercial .title { color: white; }
+    .commercial .subtitle { color: #7a94b8; }
+    .market-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin-top: 3rem; }
+    .mcard { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 2rem; }
+    .mcard-num { font-family: "Fraunces", serif; font-size: 2.5rem; color: #93c5fd; font-weight: 300; display: block; line-height: 1; margin-bottom: 0.5rem; }
+    .mcard h3 { font-size: 0.9rem; font-weight: 600; color: white; margin-bottom: 0.5rem; }
+    .mcard p { font-size: 0.82rem; color: #7a94b8; line-height: 1.7; font-weight: 300; }
+
+    /* SIGNUP */
+    .signup { background: var(--pale); }
+    .signup-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 5rem; margin-top: 3rem; align-items: start; }
+    .signup-info h3 { font-family: "Fraunces", serif; font-size: 1.3rem; color: var(--navy); font-weight: 400; margin-bottom: 1.25rem; }
+    .signup-info ul { list-style: none; }
+    .signup-info li { display: flex; gap: 0.75rem; color: var(--muted); font-size: 0.88rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); line-height: 1.55; font-weight: 300; }
+    .signup-info li:last-child { border-bottom: none; }
+    .signup-info .ck { color: var(--blue); flex-shrink: 0; margin-top: 2px; font-size: 0.85rem; }
+    .form-wrap { background: white; border: 1px solid var(--border); border-radius: 28px; padding: 2.75rem; }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .fg { margin-bottom: 1.15rem; }
+    .fg label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--navy); margin-bottom: 0.4rem; letter-spacing: 0.02em; }
+    .fg label .req { color: var(--blue); margin-left: 2px; }
+    .fg input, .fg select, .fg textarea { width: 100%; padding: 0.72rem 1rem; border: 1.5px solid var(--border); border-radius: 12px; font-family: "Outfit", sans-serif; font-size: 0.88rem; color: var(--text); background: white; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,71,194,0.08); }
+    .fg textarea { resize: vertical; min-height: 88px; }
+    .consent-wrap { display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 1.5rem; }
+    .consent-wrap input[type="checkbox"] { width: 17px; height: 17px; margin-top: 2px; flex-shrink: 0; accent-color: var(--blue); }
+    .consent-wrap label { font-size: 0.78rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
+    .submit-btn { width: 100%; background: var(--navy); color: white; padding: 0.95rem; border: none; border-radius: 14px; font-family: "Outfit", sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.25s; letter-spacing: 0.02em; }
+    .submit-btn:hover { background: var(--blue); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(24,71,194,0.3); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .ferror { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 0.7rem 1rem; color: #dc2626; font-size: 0.82rem; margin-bottom: 1rem; display: none; }
+    .fsuccess { text-align: center; padding: 3rem 2rem; display: none; }
+    .fsuccess .sico { font-size: 2.75rem; display: block; margin-bottom: 1rem; }
+    .fsuccess h3 { font-family: "Fraunces", serif; font-size: 1.6rem; color: var(--navy); font-weight: 400; margin-bottom: 0.75rem; }
+    .fsuccess p { color: var(--muted); font-size: 0.9rem; font-weight: 300; }
+
+    /* FOOTER */
+    footer { background: #040d1e; color: #4a5f80; padding: 64px 6% 40px; }
+    .foot-inner { max-width: 1200px; margin: 0 auto; }
+    .foot-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .foot-brand-logo { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
+    .foot-brand-logo img { width: 32px; height: 32px; border-radius: 7px; }
+    .foot-brand-logo span { font-family: "Fraunces", serif; font-size: 1.3rem; color: white; font-weight: 400; }
+    .foot-brand-logo span em { color: #60a5fa; font-style: normal; }
+    .foot-brand p { font-size: 0.82rem; line-height: 1.8; max-width: 250px; color: #334155; font-weight: 300; }
+    .foot-col h4 { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: white; margin-bottom: 1rem; }
+    .foot-col ul { list-style: none; }
+    .foot-col li { margin-bottom: 0.55rem; }
+    .foot-col a { color: #334155; text-decoration: none; font-size: 0.82rem; transition: color 0.2s; font-weight: 300; }
+    .foot-col a:hover { color: #93c5fd; }
+    .foot-bottom { padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #1e2d45; flex-wrap: wrap; gap: 1rem; }
+
+    /* REVEAL */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .hero-inner, .about-grid, .why-layout, .sol-layout, .signup-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-visual { display: none; }
+      .build-grid { grid-template-columns: repeat(2,1fr); }
+      .feat-grid { grid-template-columns: repeat(2,1fr); }
+      .team-grid { grid-template-columns: repeat(2,1fr); }
+      .market-grid { grid-template-columns: 1fr 1fr; }
+      .foot-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .nav-links { display: none; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .problem-grid, .build-grid, .feat-grid, .team-grid, .market-grid { grid-template-columns: 1fr; }
+      .frow { grid-template-columns: 1fr; }
+      .foot-top { grid-template-columns: 1fr; }
+      section { padding: 72px 5%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#top" class="nav-logo">
+    <img src="data:image/png;base64,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" alt="Synap Step Logo" />
+    <span>Synap<em>Step</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#why">Our Why</a></li>
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#commercial">Market</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#signup" class="nav-cta">Join Waitlist</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-dots"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">Neurological Movement Support</div>
+      <h1>Move with<br><em>confidence.</em><br><strong>Live fully.</strong></h1>
+      <p class="hero-desc">A wearable haptic device controlled through a companion app — detecting tremor frequency in real time to stabilize movement and guide coordinated motor support for individuals with Parkinson's and older adults.</p>
+      <div class="hero-btns">
+        <a href="#signup" class="btn-solid">Join the Waitlist</a>
+        <a href="#about" class="btn-outline">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="device-mockup">
+        <div class="mock-header">
+          <img src="data:image/png;base64,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" alt="Synap Step" />
+          <div class="mock-header-text">Synap Step</div>
+        </div>
+        <div class="mock-bar"></div>
+        <div class="mock-pulse">
+          <div class="pulse-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" stroke-width="2" width="18" height="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="pulse-info">
+            <span>Tremor Active</span>
+            <p>Haptic counter-frequency on</p>
+          </div>
+        </div>
+        <div class="mock-modules">
+          <div class="mock-mod"><div class="mock-mod-dot dot-green"></div>Tremor Reduction</div>
+          <div class="mock-mod"><div class="mock-mod-dot dot-blue"></div>Neuro Exercise Session</div>
+          <div class="mock-mod"><div class="mock-mod-dot dot-purple"></div>Walking Haptic Feedback</div>
+        </div>
+        <div class="mock-badge">Prototype Interface Active</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="inner">
+    <div class="about-grid">
+      <div class="about-body reveal">
+        <div class="label">About Synap Step</div>
+        <h2 class="title">A hardware invention.<br>Guided by a smart app.</h2>
+        <p>Synap Step is a health-tech concept centered around a wearable hardware device — the core invention — supported by a companion mobile app that serves as the prototype interface for testing, personalization, and demonstration.</p>
+        <p>Right now, we are starting with the app. It uses your phone's built-in haptic engine to simulate the feedback the hardware will eventually deliver. What starts as your phone's vibration will evolve into a precision wearable with purpose-built hardware that delivers targeted haptic therapy exactly where Parkinson's patients need it most.</p>
+        <p>The app is intentionally built with a simple, clean, and accessible UI so that anyone can pick it up and use it immediately. The three core features are AI driven and sensor powered — the system monitors, learns, and responds automatically.</p>
+        <div class="callout">
+          <p><strong>Note:</strong> The app is the prototype interface. The hardware is the product. These sessions are not traditional exercise — they are short, coordinated motor-based neurological activities designed to sustain mobility and coordination.</p>
+        </div>
+      </div>
+      <div class="about-cards reveal">
+        <div class="acard">
+          <div class="icon-wrap light">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div>
+            <h4>Tremor Reduction</h4>
+            <p>AI and sensory feedback monitor tremor patterns in real time and automatically deliver the right haptic response to calm hand movement — no manual input needed.</p>
+          </div>
+        </div>
+        <div class="acard">
+          <div class="icon-wrap light">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <div>
+            <h4>Neurological Exercise Section</h4>
+            <p>Fully customizable guided motor sessions. Users adjust type, duration, and frequency of short neurological movement activities designed to keep motor pathways active.</p>
+          </div>
+        </div>
+        <div class="acard">
+          <div class="icon-wrap light">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 1 6-1"/><path d="M12 6v5"/></svg>
+          </div>
+          <div>
+            <h4>Haptic Feedback During Walking</h4>
+            <p>AI and sensory monitoring detect movement in real time and automatically deliver directional haptic cues to help users stay balanced and navigate with confidence.</p>
+          </div>
+        </div>
+        <div class="acard">
+          <div class="icon-wrap light">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/></svg>
+          </div>
+          <div>
+            <h4>AI Adaptability</h4>
+            <p>The system learns each individual user over time — tracking subtle tremor shifts, movement vectors, and motor responses to continuously refine its feedback.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUR WHY -->
+<section class="why" id="why">
+  <div class="inner">
+    <div class="label">Our Why</div>
+    <h2 class="title">Built for the people who need it most.</h2>
+    <div class="why-layout">
+      <div class="why-body reveal">
+        <p>There is no cure for Parkinson's disease. That is just the reality right now, and honestly it is part of why we started building this in the first place. Krish Madhavan, one of our leads, lost his grandfather to Parkinson's. Watching someone you love struggle to pick up a glass of water or eat a meal on their own is not something you forget. An app like Synap Step could have helped his grandfather do those things. That is not a small thing to us.</p>
+        <p>Every small step Synap Step helps someone take is a step toward something bigger. Consistent neurological engagement does not just help the individual — it contributes to a broader reduction in the secondary consequences of Parkinson's and age-related decline, including fall-related injuries, emergency hospitalizations, and the rapid deterioration that often follows a loss of mobility.</p>
+        <p>We also want to keep this affordable. The people who need Synap Step most should not be priced out of it. The app stays free. The hardware will be priced around 40 to 45 dollars. Because an app that only reaches wealthy users is not really solving the problem we set out to solve.</p>
+        <div class="why-quote">"Independence isn't given back. With the right support, it's maintained."</div>
+      </div>
+      <div class="stats-grid reveal">
+        <div class="stat-box"><span class="stat-num">10M+</span><span class="stat-desc">People worldwide living with Parkinson's disease (Parkinson's Foundation)</span></div>
+        <div class="stat-box"><span class="stat-num">1 in 4</span><span class="stat-desc">Adults over 65 experience a fall annually (CDC)</span></div>
+        <div class="stat-box"><span class="stat-num">40%</span><span class="stat-desc">Of older adults show measurable decline in fine motor function (Journal of Gerontology)</span></div>
+        <div class="stat-box"><span class="stat-num">$50B+</span><span class="stat-desc">Annual cost of fall-related injuries to the US healthcare system (CDC)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem" id="problem">
+  <div class="inner">
+    <div class="label">The Problem</div>
+    <h2 class="title">Why existing solutions fall short.</h2>
+    <div class="problem-grid reveal">
+      <div class="pcard"><span class="pnum">01</span><h3>Tremors Disrupt Daily Life</h3><p>Parkinson's tremors involve a massive number of variables — amplitude, rhythm, directional vectors, muscle fatigue, medication cycles, and emotional state — all changing constantly throughout the day.</p></div>
+      <div class="pcard"><span class="pnum">02</span><h3>Hardware Exists But Is Inaccessible</h3><p>Devices using haptic or electrical stimulation for tremors are confined to research settings. They are bulky, not ergonomically designed for daily wear, and priced completely out of reach for most families.</p></div>
+      <div class="pcard"><span class="pnum">03</span><h3>No All-in-One App Solution</h3><p>No consumer app today addresses tremor reduction, neurological movement guidance, and directional walking support together in one simple platform. These problems have always been treated separately.</p></div>
+      <div class="pcard"><span class="pnum">04</span><h3>Decline Without Engagement</h3><p>Regular neurological engagement can help preserve motor pathways. But existing tools are reactive and impersonal — there is a critical gap between clinical therapy and accessible daily support.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="solution" id="solution">
+  <div class="inner">
+    <div class="label">How We Can Solve It</div>
+    <h2 class="title">Intelligent support,<br>tailored to each person.</h2>
+    <div class="sol-layout">
+      <div class="sol-body reveal">
+        <p>Synap Step combines haptic feedback technology, AI-driven personalization, and short motor-based neurological movement guidance into a single accessible system. The hardware detects tremor frequency and responds with precision counter-stimulation. The app learns from every session and continuously refines the guidance it provides.</p>
+        <p>Our hardware concept draws inspiration from the adaptive haptic feedback technology in the PlayStation 5 controller — precision actuators capable of simulating highly specific resistance and frequency patterns — repurposed into a small wearable bracelet or ring form factor.</p>
+        <ul class="sol-list">
+          <li><span class="chk">&#10003;</span>Real-time tremor frequency detection with AI-driven haptic response</li>
+          <li><span class="chk">&#10003;</span>Fully customizable neurological movement sessions</li>
+          <li><span class="chk">&#10003;</span>Directional haptic feedback during walking and stair navigation</li>
+          <li><span class="chk">&#10003;</span>Machine learning that adapts to each user's unique tremor patterns</li>
+          <li><span class="chk">&#10003;</span>Timed reminders to sustain consistent neurological engagement</li>
+          <li><span class="chk">&#10003;</span>Simple elder-friendly interface requiring no technical background</li>
+          <li><span class="chk">&#10003;</span>Progress tracking and longitudinal movement data</li>
+        </ul>
+      </div>
+      <div class="pipeline reveal">
+        <div class="pipe-label">System Architecture</div>
+        <div class="pipe-step"><div class="pipe-dot-wrap"><div class="pipe-dot"></div><div class="pipe-line"></div></div><div><span class="pipe-tag">Hardware Device</span><p>Wearable sensors detect individual tremor frequency patterns across multiple variables simultaneously.</p></div></div>
+        <div class="pipe-step"><div class="pipe-dot-wrap"><div class="pipe-dot"></div><div class="pipe-line"></div></div><div><span class="pipe-tag">Haptic Response</span><p>Counter-frequency stimulation calibrated to the user's specific tremor signature to stabilize hand movement.</p></div></div>
+        <div class="pipe-step"><div class="pipe-dot-wrap"><div class="pipe-dot"></div><div class="pipe-line"></div></div><div><span class="pipe-tag">Movement Guidance</span><p>Short coordinated motor sessions — not workouts, but neurological activities designed to sustain coordination.</p></div></div>
+        <div class="pipe-step"><div class="pipe-dot-wrap"><div class="pipe-dot"></div><div class="pipe-line"></div></div><div><span class="pipe-tag">AI Personalization</span><p>Machine learning tracks subtle movement vectors and daily changes, refining haptic profiles and session difficulty.</p></div></div>
+        <div class="pipe-step"><div class="pipe-dot-wrap"><div class="pipe-dot"></div><div class="pipe-line"></div></div><div><span class="pipe-tag">Dashboard</span><p>Users and caregivers track progress, session history, and movement quality over time.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILDING -->
+<section class="building" id="building">
+  <div class="inner">
+    <div class="label">What We Are Building</div>
+    <h2 class="title">Every component built with purpose.</h2>
+    <div class="build-grid reveal">
+      <div class="bcard">
+        <div class="icon-lg light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <h3>Wearable Haptic Device</h3>
+        <p>The core invention — a small bracelet or ring form factor with precision haptic actuators designed specifically for therapeutic tremor stabilization and motor support.</p>
+      </div>
+      <div class="bcard">
+        <div class="icon-lg light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <h3>Tremor Frequency Detection</h3>
+        <p>Onboard sensors lock onto each user's tremor signature, reading amplitude, directional vectors, rhythm, and muscle response simultaneously to enable real-time adaptive feedback.</p>
+      </div>
+      <div class="bcard">
+        <div class="icon-lg light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Neurological Movement Sessions</h3>
+        <p>Short science-backed motor activities — not traditional exercise — that stimulate neurological pathways responsible for coordination and motor control, fully customizable per user.</p>
+      </div>
+      <div class="bcard">
+        <div class="icon-lg light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/><path d="M9 7h6"/><path d="M9 11h6"/></svg>
+        </div>
+        <h3>Companion App Interface</h3>
+        <p>Currently using the phone's haptic engine as a proof of concept. Handles personalization, session scheduling, device calibration, and user data with a simple clean UI.</p>
+      </div>
+      <div class="bcard">
+        <div class="icon-lg light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M21.17 8H12V2.83"/></svg>
+        </div>
+        <h3>AI and Machine Learning</h3>
+        <p>Adaptive algorithms learn from every session — adjusting haptic profiles, movement difficulty, and reminder timing based on how each individual responds day to day.</p>
+      </div>
+      <div class="bcard">
+        <div class="icon-lg light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Elder-Friendly Design</h3>
+        <p>Every interface decision prioritizes simplicity and clarity. Built so that someone who has never used a health tech app before can pick it up and understand it immediately.</p>
+      </div>
+    </div>
+    <div class="build-note reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2" width="22" height="22" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p><strong>A note on our movement guidance:</strong> The sessions Synap Step delivers are not workouts or physical therapy exercises. They are intentional, coordinated motor-based neurological activities designed to stimulate the pathways associated with motor control and help sustain movement capability over time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="inner">
+    <div class="label">Features</div>
+    <h2 class="title">Built for daily life.</h2>
+    <div class="feat-grid reveal">
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <h4>Tremor-Responsive Haptics</h4>
+        <p>Real-time AI-driven counter-frequency stimulation that automatically adjusts to reduce tremor intensity.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <h4>Personalized Guidance</h4>
+        <p>Movement sessions customized to each individual's neurological needs and adjusted over time.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M21.17 8H12V2.83"/></svg>
+        </div>
+        <h4>AI Adaptation</h4>
+        <p>Machine learning refines your haptic profile and movement plan with every single session.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 1 6-1"/><path d="M12 6v5"/></svg>
+        </div>
+        <h4>Walking Haptic Feedback</h4>
+        <p>Directional cues during walking and stair navigation to support balance and confident movement.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h4>Timed Reminders</h4>
+        <p>Customizable prompts to keep neurological engagement consistent throughout the day.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h4>Progress Tracking</h4>
+        <p>Longitudinal data on tremor intensity, session completion, and movement quality over time.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h4>Simple Interface</h4>
+        <p>Designed specifically for older adults — clear, large, and intuitive at every step.</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-feat light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1847c2" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h4>Caregiver Access</h4>
+        <p>Family members and caregivers can monitor progress and adjust settings remotely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMERCIAL -->
+<section class="commercial" id="commercial">
+  <div class="inner">
+    <div class="label">Market Opportunity</div>
+    <h2 class="title">A booming field at exactly the right time.</h2>
+    <p class="subtitle">Synap Step sits at the intersection of neurotechnology, AI healthcare, and elder care — three of the fastest growing industries in the world right now.</p>
+    <div class="market-grid reveal">
+      <div class="mcard"><span class="mcard-num">$38B</span><h3>Neurotechnology Market by 2030</h3><p>Projected to grow from 14 billion to over 38 billion dollars by 2030, driven by demand for non-invasive neurological support tools (Grand View Research).</p></div>
+      <div class="mcard"><span class="mcard-num">$45B</span><h3>AI in Healthcare by 2026</h3><p>Expected to surpass 45 billion dollars by 2026 as hospitals adopt AI-driven tools for diagnostics and patient care (Fortune Business Insights).</p></div>
+      <div class="mcard"><span class="mcard-num">10M+</span><h3>Parkinson's Patients Worldwide</h3><p>Over 10 million people live with Parkinson's globally, with 60,000 new US cases every year (Parkinson's Foundation).</p></div>
+      <div class="mcard"><span class="mcard-num">1 in 4</span><h3>Elderly Adults Fall Annually</h3><p>The CDC reports 1 in 4 adults over 65 falls each year, costing the US healthcare system over 50 billion dollars annually.</p></div>
+      <div class="mcard"><span class="mcard-num">40%</span><h3>Motor Decline in Older Adults</h3><p>Over 40 percent of older adults show measurable fine motor function decline affecting daily life (Journal of Gerontology).</p></div>
+      <div class="mcard"><span class="mcard-num">B2B</span><h3>Institutional Market Pathway</h3><p>Neurological clinics, rehab centers, and hospitals are seeking supplemental tools. Synap Step could be integrated as a prescribed daily support app alongside clinical care.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team" id="team">
+  <div class="inner">
+    <div class="label">The Founders</div>
+    <h2 class="title">Meet the team.</h2>
+    <p class="subtitle">Four first-year students across kinesiology, business, mechanical engineering, and environmental engineering — united by a shared belief that better tools can change lives.</p>
+    <div class="team-grid reveal">
+      <div class="tcard"><div class="avatar">K</div><h3>Krish Madhavan</h3><div class="role">Kinesiology</div><div class="yr">First Year</div></div>
+      <div class="tcard"><div class="avatar">J</div><h3>Jacob Monroe</h3><div class="role">Business</div><div class="yr">First Year</div></div>
+      <div class="tcard"><div class="avatar">D</div><h3>Dario Rager</h3><div class="role">Mechanical Engineering</div><div class="yr">First Year</div></div>
+      <div class="tcard"><div class="avatar">T</div><h3>Ty Fought</h3><div class="role">Environmental Engineering</div><div class="yr">First Year</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNUP -->
+<section class="signup" id="signup">
+  <div class="inner">
+    <div class="label">Join the Waitlist</div>
+    <h2 class="title">Sign up for updates.</h2>
+    <p class="subtitle">Be among the first to hear about development milestones, pilot programs, and early access opportunities.</p>
+    <div class="signup-layout">
+      <div class="signup-info reveal">
+        <h3>Why sign up?</h3>
+        <ul>
+          <li><span class="ck">&#10003;</span>Early access to the Synap Step app and hardware pilot</li>
+          <li><span class="ck">&#10003;</span>Research updates on haptic neurological support</li>
+          <li><span class="ck">&#10003;</span>Input on features and product direction</li>
+          <li><span class="ck">&#10003;</span>Connection to a community built around movement and independence</li>
+          <li><span class="ck">&#10003;</span>Direct line to the founding team</li>
+        </ul>
+      </div>
+      <div class="form-wrap reveal">
+        <div class="ferror" id="formErr"></div>
+        <div id="formBody">
+          <div class="frow">
+            <div class="fg"><label>Full Name <span class="req">*</span></label><input type="text" id="fn" placeholder="Your full name" /></div>
+            <div class="fg"><label>Email Address <span class="req">*</span></label><input type="email" id="em" placeholder="you@example.com" /></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Phone <span style="color:var(--muted);font-weight:300">(optional)</span></label><input type="tel" id="ph" placeholder="+1 (555) 000-0000" /></div>
+            <div class="fg"><label>Age Range <span class="req">*</span></label><select id="ar"><option value="">Select age range</option><option>Under 40</option><option>40-54</option><option>55-64</option><option>65-74</option><option>75+</option><option>Prefer not to say</option></select></div>
+          </div>
+          <div class="fg"><label>Signing up for <span class="req">*</span></label><select id="sf"><option value="">Select one</option><option>Myself</option><option>A loved one / family member</option><option>A patient (healthcare provider)</option><option>Research or professional interest</option></select></div>
+          <div class="fg"><label>Primary Interest <span class="req">*</span></label><select id="pi"><option value="">Select your primary interest</option><option>Parkinson's tremor support</option><option>Balance and fall prevention</option><option>Neurological movement support</option><option>Early access to the device</option><option>Research updates</option><option>General interest</option></select></div>
+          <div class="fg"><label>Message <span style="color:var(--muted);font-weight:300">(optional)</span></label><textarea id="msg" placeholder="Tell us about your situation, what you're hoping for, or any questions you have."></textarea></div>
+          <div class="consent-wrap"><input type="checkbox" id="con" /><label for="con">I consent to being contacted by the Synap Step team with updates, research findings, and early access information. We will never share your data with third parties.</label></div>
+          <button class="submit-btn" id="subBtn" onclick="handleSub()">Join the Waitlist</button>
+        </div>
+        <div class="fsuccess" id="formOk">
+          <span class="sico">&#127881;</span>
+          <h3>You're on the list!</h3>
+          <p>Thank you for your interest in Synap Step. We'll be in touch with updates, research milestones, and early access opportunities. Welcome to the community.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <div class="foot-brand-logo">
+          <img src="data:image/png;base64,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" alt="Synap Step" />
+          <span>Synap<em>Step</em></span>
+        </div>
+        <p>A movement-based neurological support platform helping individuals with Parkinson's and older adults sustain mobility, stability, and independence through intelligent haptic feedback.</p>
+      </div>
+      <div class="foot-col"><h4>Product</h4><ul><li><a href="#about">About</a></li><li><a href="#solution">How It Works</a></li><li><a href="#building">What We're Building</a></li><li><a href="#features">Features</a></li></ul></div>
+      <div class="foot-col"><h4>Company</h4><ul><li><a href="#why">Our Why</a></li><li><a href="#commercial">Market</a></li><li><a href="#team">Team</a></li><li><a href="#signup">Join Waitlist</a></li></ul></div>
+      <div class="foot-col"><h4>Contact</h4><ul><li><a href="mailto:hello@synapstep.com">hello@synapstep.com</a></li><li><a href="#">Instagram</a></li><li><a href="#">LinkedIn</a></li><li><a href="#">Twitter / X</a></li></ul></div>
+    </div>
+    <div class="foot-bottom">
+      <span>2025 Synap Step. All rights reserved.</span>
+      <span>Built with purpose. For people who deserve better tools.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(e => { e.forEach(x => { if(x.isIntersecting) x.target.classList.add("on"); }); }, {threshold:0.1});
+  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+
+  const submissions = [];
+  function handleSub() {
+    const err = document.getElementById("formErr");
+    err.style.display = "none";
+    const data = {
+      fullName: document.getElementById("fn").value.trim(),
+      email: document.getElementById("em").value.trim(),
+      phone: document.getElementById("ph").value.trim(),
+      ageRange: document.getElementById("ar").value,
+      signingFor: document.getElementById("sf").value,
+      primaryInterest: document.getElementById("pi").value,
+      message: document.getElementById("msg").value.trim(),
+      consent: document.getElementById("con").checked,
+      submittedAt: new Date().toISOString()
+    };
+    if (!data.fullName || !data.email || !data.ageRange || !data.signingFor || !data.primaryInterest) {
+      err.textContent = "Please fill in all required fields."; err.style.display = "block"; return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      err.textContent = "Please enter a valid email address."; err.style.display = "block"; return;
+    }
+    if (!data.consent) {
+      err.textContent = "Please check the consent box to continue."; err.style.display = "block"; return;
+    }
+    const btn = document.getElementById("subBtn");
+    btn.disabled = true; btn.textContent = "Submitting...";
+    setTimeout(() => {
+      submissions.push(data);
+      document.getElementById("formBody").style.display = "none";
+      document.getElementById("formOk").style.display = "block";
+    }, 800);
+  }
+</script>
+</body>
+</html>
